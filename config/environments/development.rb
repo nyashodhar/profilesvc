@@ -34,4 +34,9 @@ Rails.application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+
+  #Logger Config
+  config.logger = ActiveSupport::TaggedLogging.new(Logger.new('log/profilesvc-dev.log', 'daily'))
+  config.log_level = :info
+
 end

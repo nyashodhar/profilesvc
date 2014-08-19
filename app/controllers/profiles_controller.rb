@@ -14,6 +14,7 @@ class ProfilesController < ActionController::Base
   # curl -v -X POST http://127.0.0.1:3000/profile -H "Accept: application/json" -H "Content-Type: application/json" -H "X-User-Token: a6XK1qPfwyNd_HqjsgSS" -d '{"firstname":"Frank"}'
   ####################################################
   def createOrUpdate
+    logger.info "Hello there"
     render :status => 201, :json => "Hello there"
   end
 end
