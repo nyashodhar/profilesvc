@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+
+  # ProfilesController:
+  #===============================
+  post 'profile', to: 'profiles#createOrUpdate', as: 'createOrUpdate'
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
