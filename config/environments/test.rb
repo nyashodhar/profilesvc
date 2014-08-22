@@ -1,4 +1,8 @@
 Rails.application.configure do
+
+  # Base URL for downstrean auth service
+  config.authsvc_base_url = "https://authsvcmock.petpal.mobi"
+
   # Settings specified here will take precedence over those in config/application.rb.
 
   # The test environment is used exclusively to run your application's

@@ -1,5 +1,14 @@
 class ProfilesController < ActionController::Base
 
+  include ApplicationHelper
+
+  #
+  # Note: This filter will do a downstream request to the auth service to
+  # check that there is a sign-in for the auth token, and that the sign-in
+  # is not expired
+  #
+  before_action :ensureAuthorized
+
   ####################################################
   # Create or update profile
   #
