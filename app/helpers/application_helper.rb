@@ -3,25 +3,29 @@ module ApplicationHelper
   ########################################################################
   # This method is in use ALL PROTECTED APIS.
   #
-  # This method uses a downstream call to the auth service to verify that
-  # that the user is logged in and that the auth token is not expired.
+  # If something goes wrong this method will render one of the two
+  # following errors back to the client.
   #
-  # If the user is not logged in, this method will give a 401 response
-  # and control will not reach the protected controller action.
+  # 401:
+  # - The request did not include an auth token
+  # - Auth service found a sign-in for the auth token, but it's expired
+  # - Auth service did not find any sign-in for given token
   #
-  # If the user is logged in, but the auth token is expired, this method
-  # will give a 401 response and control will not reach the protected
-  # controller action.
+  # 500:
+  # - The auth service request didn't get any response
+  # - Auth service gave a 4xx other than 401 or a 5xx response
+  # - Auth service gave a 200 response, but the response body was not valid
   #
-  # If the user is logged in and the auth token is not expired, this
-  # method will allow control to be reach the controller action.
+  # If the auth service gives a 200 response that passes a validation
+  # check we will conclude that the user's sign-in is valid and control
+  # will be allowed to reach the controller action.
   ########################################################################
   def ensureAuthorized
 
     token = request.headers['X-User-Token']
     if(token.blank?)
       logger.error "ensureAuthorized(): No auth token found in request"
-      render :status => 422, :json => {:error => I18n.t("422user_token_missing")}
+      render :status => 401, :json => {:error => I18n.t("401response")}
       return
     end
 

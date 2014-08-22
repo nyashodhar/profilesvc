@@ -21,5 +21,4 @@
 
 en:
   401response: "Not authorized"
-  422user_token_missing: "User token missing"
   500response_internal_server_error: "Internal Server Error"
