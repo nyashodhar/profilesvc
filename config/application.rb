@@ -15,6 +15,9 @@ module Profilesvc
     # Ensure JSON parsing errors get nice JSON responses
     config.middleware.insert_before ActionDispatch::ParamsParser, "CatchJsonParseErrors"
 
+    # Ensure certain unexpected errors does not give out of control HTML response
+    config.middleware.insert_before ActionDispatch::ParamsParser, "CatchUnexpectedErrors"
+
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
