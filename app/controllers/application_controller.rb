@@ -7,11 +7,6 @@ class ApplicationController < ActionController::Base
     error(e)
   end
 
-  rescue_from NameError do |e|
-    error(e)
-  end
-
-
   def error(e)
     trace = e.backtrace[0,10].join("\n")
     logger.error "Custom error handler - Error: #{e.class.name} : #{e.message}, Trace: #{trace}\n"
