@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class CatchJsonParseErrorsIntegrationTest  < ActionDispatch::IntegrationTest
+class CatchJsonParseErrorsIntegrationTest < ActionDispatch::IntegrationTest
 
   #
   # Test that requests with invalid json are handled properly

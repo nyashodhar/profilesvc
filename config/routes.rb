@@ -6,6 +6,8 @@ Rails.application.routes.draw do
 
   get "/", to: "deployments#status", as: 'status'
 
+  match "*path", to: "application#not_found", via: :all
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
