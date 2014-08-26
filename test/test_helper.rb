@@ -4,6 +4,8 @@ require 'rails/test_help'
 require 'webmock'
 include WebMock::API
 require 'rest-client'
+require 'helpers/auth_service_mock_helper'
+include AuthServiceMockHelper
 
 class ActiveSupport::TestCase
   # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
