@@ -118,7 +118,6 @@ class MongoMigration
     #
 
     version_docs = $migrations_coll.find
-    version_docs.count
 
     if(version_docs.count == 0)
       return nil

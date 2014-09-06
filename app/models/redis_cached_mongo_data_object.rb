@@ -96,7 +96,6 @@ class RedisCachedMongoDataObject
     docs = $profiles_coll.find(query)
 
     if(docs.count == 0)
-
       return nil
     end
 
