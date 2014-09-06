@@ -31,6 +31,7 @@ class ProfilesController < ActionController::Base
 
     #profile = Profile.find_by_id(7)
     #STDOUT.write "*** profile.serialize = #{profile.serialize}\n"
+    #profile.set_field(:first_name, "Hank")
     #profile.store
 
     the_response = {:status => "updated"}.to_json

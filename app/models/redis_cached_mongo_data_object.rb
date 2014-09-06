@@ -24,6 +24,14 @@ class RedisCachedMongoDataObject
     store_in_mongo()
   end
 
+  def set_field(field, value)
+    my_ordered_fields = get_ordered_fields
+    if(my_ordered_fields[field].blank?)
+      raise("Can't set field value for field in profile instance: #{field} is not a valid field. Valid fields are: #{my_ordered_fields.keys}")
+    end
+    @field_hash[field] = value
+  end
+
   #
   # This is a factory method that will produce a profiles object
   # instance based on a record found in mongo
