@@ -29,6 +29,10 @@ class ProfilesController < ActionController::Base
     #STDOUT.write "*** profile.serialize = #{profile.serialize}\n"
     #profile.store
 
+    #profile = Profile.find_by_id(7)
+    #STDOUT.write "*** profile.serialize = #{profile.serialize}\n"
+    #profile.store
+
     the_response = {:status => "updated"}.to_json
     render :status => 201, :json => the_response
   end

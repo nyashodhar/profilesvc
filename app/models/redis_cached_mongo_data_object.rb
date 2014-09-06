@@ -12,18 +12,7 @@ class RedisCachedMongoDataObject
   #
 
   def initialize(arguments = {})
-
-    @field_hash = Hash.new
-
     build_field_hash_from_args(arguments)
-
-    #if(arguments[JSON_DOC_ARG].blank?)
-    #  # Initialize from JSON (probably pulled from db)
-    #  build_field_hash_from_args(arguments)
-    #else
-    #  # Initialize from itemized hash (typically when used first time)
-    #  build_field_hash_from_json(arguments[JSON_DOC_ARG])
-    #end
   end
 
   def serialize
@@ -33,6 +22,33 @@ class RedisCachedMongoDataObject
   def store
     ### TODO: Implement hybrid mongo/redis operation
     store_in_mongo()
+  end
+
+  #
+  # This is a factory method that will produce a profiles object
+  # instance based on a record found in mongo
+  #
+  def self.find_by_id(id)
+
+    doc = find_in_mongo(id)
+    if(doc.blank?)
+      return nil
+    end
+
+    hash_with_symbol_keys = Hash.new
+
+    # Convert each key into a symbol
+    doc.keys.each { |arg_key|
+      symbol_key = arg_key.to_sym
+      hash_with_symbol_keys[symbol_key] = doc[arg_key]
+    }
+
+    # Filter out the mongo _id field here
+    hash_with_symbol_keys.delete(:_id)
+
+    # Create a new profiles instance
+    profile = Profile.new(hash_with_symbol_keys)
+    return profile
   end
 
   private
@@ -57,29 +73,41 @@ class RedisCachedMongoDataObject
     }
 
     # Everything is cool, accept the args
+    @field_hash = Hash.new
     arguments.keys.each { |arg_key|
       @field_hash[arg_key] = arguments[arg_key]
     }
   end
 
-  def build_field_hash_from_json(json_doc)
-
-    hash_from_json = JSON.parse(json_doc)
-    hash_with_symbol_keys = Hash.new
-
-    # Convert each key into a symbol
-    hash_from_json.keys.each { |arg_key|
-      symbol_key = arg_key.to_sym
-      hash_with_symbol_keys[symbol_key] = hash_from_json[arg_key]
-    }
-
-    # Then build the object normally..
-    build_field_hash_from_args(hash_with_symbol_keys)
-  end
-
   def get_ordered_fields
     return @@thing_ordered_fields
   end
+
+  def self.find_in_mongo(id)
+
+    #
+    # There should only be a single doc in the profiles collection.
+    # with the given id.
+    #
+
+    query = Hash.new
+    query[:id] = id.to_i
+
+    docs = $profiles_coll.find(query)
+
+    if(docs.count == 0)
+
+      return nil
+    end
+
+    if(docs.count > 1)
+      raise "#{docs.count} profiles found matching id #{id}. There should be only 1!"
+    end
+
+    doc = docs.next
+    return doc
+  end
+
 
   def store_in_mongo
 
