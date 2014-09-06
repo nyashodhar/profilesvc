@@ -72,14 +72,6 @@ class MongoMigration
 
   def store_version
 
-    #
-    # Example on how to query for profile object based on id:
-    #
-    #   use developmentdb
-    #
-
-    #migration_doc = get_version_doc
-
     query = Hash.new
     query[:_id] = 1
 
