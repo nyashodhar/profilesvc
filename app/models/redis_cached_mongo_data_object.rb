@@ -15,19 +15,27 @@ class RedisCachedMongoDataObject
 
     @field_hash = Hash.new
 
-    ##
-    ## TODO: Change so JSON is not inserted from outside
-    ## Loading of JSON should be internalized via factory-style method...
-    ##
+    build_field_hash_from_args(arguments)
 
-    if(arguments[JSON_DOC_ARG].blank?)
-      # Initialize from JSON (probably pulled from db)
-      build_field_hash_from_args(arguments)
-    else
-      # Initialize from itemized hash (typically when used first time)
-      build_field_hash_from_json(arguments[JSON_DOC_ARG])
-    end
+    #if(arguments[JSON_DOC_ARG].blank?)
+    #  # Initialize from JSON (probably pulled from db)
+    #  build_field_hash_from_args(arguments)
+    #else
+    #  # Initialize from itemized hash (typically when used first time)
+    #  build_field_hash_from_json(arguments[JSON_DOC_ARG])
+    #end
   end
+
+  def serialize
+    return @field_hash.to_json
+  end
+
+  def store
+    ### TODO: Implement hybrid mongo/redis operation
+    store_in_mongo()
+  end
+
+  private
 
   def build_field_hash_from_args(arguments)
 
@@ -54,17 +62,6 @@ class RedisCachedMongoDataObject
     }
   end
 
-  def serialize
-    return @field_hash.to_json
-  end
-
-  def store
-    ### TODO: Implement hybrid mongo/redis operation
-    ###$profiles_coll.insert(@field_hash)
-  end
-
-  private
-
   def build_field_hash_from_json(json_doc)
 
     hash_from_json = JSON.parse(json_doc)
@@ -84,5 +81,49 @@ class RedisCachedMongoDataObject
     return @@thing_ordered_fields
   end
 
+  def store_in_mongo
+
+    #
+    # EXAMPLES:
+    #
+    # Insert a new profile in mongo
+    #
+    #   use developmentdb
+    #   db.profiles.insert({"_id":7, "id":7, "first_name":"Dude", "last_name":"Fred"})
+    #
+    # Find a profile in mongo:
+    #
+    #   use developmentdb
+    #   db.profiles.find({"id" : 7})
+    #
+    # Remove a profile in mongo:
+    #
+    #   use developmentdb
+    #   db.profiles.remove({"id" : 7})
+    #
+
+    query = Hash.new
+
+    # Use the id as the _id as well to make the mongo id deterministic
+    query[:_id] = @field_hash[:id]
+
+    doc = @field_hash.clone
+    doc[:_id] = @field_hash[:id]
+
+    # Perform an insert or update
+    update_params = Hash.new
+    update_params[:upsert] = true
+
+    insert_or_update_result = $profiles_coll.update(query, doc, update_params)
+
+    number_of_updated_records = insert_or_update_result['nModified'].to_i
+    upserted = !insert_or_update_result['upserted'].blank?
+
+    if(number_of_updated_records != 1 && !upserted)
+      raise "Could not store store profile doc #{doc}. No upsert happened, and #{number_of_updated_records} records were updated, 1 record should have been updated or inserted"
+    end
+
+    return true
+  end
 
 end

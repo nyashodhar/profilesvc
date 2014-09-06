@@ -24,6 +24,11 @@ class ProfilesController < ActionController::Base
   ####################################################
   def createOrUpdate
     logger.info "Update request handled"
+
+    #profile = Profile.new(:id => 7, :first_name => 'Frank', :last_name => 'Tank')
+    #STDOUT.write "*** profile.serialize = #{profile.serialize}\n"
+    #profile.store
+
     the_response = {:status => "updated"}.to_json
     render :status => 201, :json => the_response
   end
