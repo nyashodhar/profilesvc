@@ -1,5 +1,3 @@
-require "#{Rails.root}/lib/tasks/util/mongo_migration"
-
 class ProfilesIdIndex < MongoMigration
 
   #
@@ -31,8 +29,6 @@ class ProfilesIdIndex < MongoMigration
       id_field_unique_index_spec["id"] = 1
 
       result = $profiles_coll.ensure_index(id_field_unique_index_spec)
-
-      STDOUT.write "result.class = #{result.class}\n"
 
       # Note: In case of success, result is a string with value 'id_1'
 
