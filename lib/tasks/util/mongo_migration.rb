@@ -18,20 +18,23 @@ class MongoMigration
     begin
       current_version = get_current_version()
 
-      if(@my_version > @target_version)
-        return "SKIPPING"
-      end
-
       if(current_version >= @my_version)
         return "ALREADY APPLIED"
       end
 
+      if(@my_version > @target_version)
+        return "SKIPPING"
+      end
+
       # Apply the actual db update
-      apply_db_update()
+      result = apply_db_update()
 
-      store_version()
-
-      return "UPDATE PERFORMED"
+      if(result == true)
+        store_version()
+        return "UPDATE PERFORMED"
+      else
+        return "UPDATE FAILED"
+      end
 
     rescue => e
       trace = e.backtrace[0,10].join("\n")
@@ -44,6 +47,10 @@ class MongoMigration
 
   def apply_db_update
 
+  end
+
+  def description
+     "<None>"
   end
 
   #

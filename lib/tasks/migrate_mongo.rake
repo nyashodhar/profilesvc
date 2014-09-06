@@ -45,7 +45,7 @@ namespace :db do
     version_to_object.keys.each { |version|
       mongo_migration = version_to_object[version]
       migration_result = mongo_migration.migrate()
-      STDOUT.write "  #{version}: #{migration_result}\n"
+      STDOUT.write "  #{version}: #{migration_result} (Description: #{mongo_migration.description})\n"
     }
 
     STDOUT.write "=> Migration complete\n"
