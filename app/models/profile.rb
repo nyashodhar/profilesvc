@@ -1,11 +1,21 @@
 class Profile < RedisCachedMongoDataObject
 
-  @@subthing_ordered_fields = @@thing_ordered_fields.clone
-  @@subthing_ordered_fields[:first_name] = true
-  @@subthing_ordered_fields[:last_name] = true
+  @@profile_ordered_fields = @@ordered_fields.clone
+  @@profile_ordered_fields[:first_name] = true
+  @@profile_ordered_fields[:last_name] = true
+
+  private
+
+  def self.static_get_mongo_collection
+    return $profiles_coll
+  end
+
+  def get_mongo_collection
+    return $profiles_coll
+  end
 
   def get_ordered_fields
-    @@subthing_ordered_fields
+    @@profile_ordered_fields
   end
 end
 

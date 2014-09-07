@@ -3,8 +3,8 @@ class RedisCachedMongoDataObject
   # Special arg, used to initialize from JSON
   JSON_DOC_ARG = :json_doc;
 
-  @@thing_ordered_fields = ActiveSupport::OrderedHash.new()
-  @@thing_ordered_fields[:id] = true
+  @@ordered_fields = ActiveSupport::OrderedHash.new()
+  @@ordered_fields[:id] = true
 
   #
   # Kind of cool hint from here:
@@ -27,18 +27,18 @@ class RedisCachedMongoDataObject
   def set_field(field, value)
     my_ordered_fields = get_ordered_fields
     if(my_ordered_fields[field].blank?)
-      raise("Can't set field value for field in profile instance: #{field} is not a valid field. Valid fields are: #{my_ordered_fields.keys}")
+      raise("Can't set value for field: #{field} is not a valid field. Valid fields are: #{my_ordered_fields.keys}")
     end
     @field_hash[field] = value
   end
 
   #
-  # This is a factory method that will produce a profiles object
+  # This is a factory method that will produce an object
   # instance based on a record found in mongo
   #
   def self.find_by_id(id)
 
-    doc = find_in_mongo(id)
+    doc = static_find_in_mongo(id)
     if(doc.blank?)
       return nil
     end
@@ -54,9 +54,9 @@ class RedisCachedMongoDataObject
     # Filter out the mongo _id field here
     hash_with_symbol_keys.delete(:_id)
 
-    # Create a new profiles instance
-    profile = Profile.new(hash_with_symbol_keys)
-    return profile
+    # Create a new instance
+    data_object = self.new(hash_with_symbol_keys)
+    return data_object
   end
 
   private
@@ -88,27 +88,35 @@ class RedisCachedMongoDataObject
   end
 
   def get_ordered_fields
-    return @@thing_ordered_fields
+    return @@ordered_fields
   end
 
-  def self.find_in_mongo(id)
+  def get_mongo_collection
+    return nil
+  end
+
+  def self.static_get_mongo_collection
+    return nil
+  end
+
+  def self.static_find_in_mongo(id)
 
     #
-    # There should only be a single doc in the profiles collection.
+    # There should only be a single doc in the collection.
     # with the given id.
     #
 
     query = Hash.new
     query[:id] = id.to_i
 
-    docs = $profiles_coll.find(query)
+    docs = static_get_mongo_collection.find(query)
 
     if(docs.count == 0)
       return nil
     end
 
     if(docs.count > 1)
-      raise "#{docs.count} profiles found matching id #{id}. There should be only 1!"
+      raise "#{docs.count} object found matching id #{id}. There should be only 1!"
     end
 
     doc = docs.next
@@ -121,17 +129,17 @@ class RedisCachedMongoDataObject
     #
     # EXAMPLES:
     #
-    # Insert a new profile in mongo
+    # Insert a new object in mongo
     #
     #   use developmentdb
     #   db.profiles.insert({"_id":7, "id":7, "first_name":"Dude", "last_name":"Fred"})
     #
-    # Find a profile in mongo:
+    # Find an object in mongo:
     #
     #   use developmentdb
     #   db.profiles.find({"id" : 7})
     #
-    # Remove a profile in mongo:
+    # Remove an object in mongo:
     #
     #   use developmentdb
     #   db.profiles.remove({"id" : 7})
@@ -139,7 +147,7 @@ class RedisCachedMongoDataObject
 
     query = Hash.new
 
-    # Use the id as the _id as well to make the mongo id deterministic
+    # Use the id as the _id as well to make the mongo _id deterministic
     query[:_id] = @field_hash[:id]
 
     doc = @field_hash.clone
@@ -149,13 +157,13 @@ class RedisCachedMongoDataObject
     update_params = Hash.new
     update_params[:upsert] = true
 
-    insert_or_update_result = $profiles_coll.update(query, doc, update_params)
+    insert_or_update_result = get_mongo_collection.update(query, doc, update_params)
 
     number_of_updated_records = insert_or_update_result['nModified'].to_i
     upserted = !insert_or_update_result['upserted'].blank?
 
     if(number_of_updated_records != 1 && !upserted)
-      raise "Could not store store profile doc #{doc}. No upsert happened, and #{number_of_updated_records} records were updated, 1 record should have been updated or inserted"
+      raise "Could not store doc #{doc} in mongo. No upsert happened, and #{number_of_updated_records} records were updated, 1 record should have been updated or inserted"
     end
 
     return true
