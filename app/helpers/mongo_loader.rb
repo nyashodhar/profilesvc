@@ -48,6 +48,14 @@ module MongoLoader
       $mongo_db = $mongo_client.db(dbname)
       $profiles_coll = $mongo_db.collection(profiles_collection)
       $migrations_coll = $mongo_db.collection(migrations_collection)
+
+      #
+      # This is needed for the drop_mongo rake task.
+      # The drop operation is done by passing the name of the db
+      # to the mongo client. Making this a global var makes it
+      # possible to access the actual dbname later.
+      #
+      $mongo_config = mongo_info.clone
       STDOUT.write "=> Mongo initializer: Env: #{the_environment}, connected to #{dbhost}:#{dbport}, db: #{dbname}, profiles_collection: #{profiles_collection}, migrations_collection: #{migrations_collection}\n"
 
     rescue => e
