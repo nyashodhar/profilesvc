@@ -1,9 +1,13 @@
 Rails.application.configure do
 
-  # Base URL for downstrean auth service
+  # Settings specified here will take precedence over those in config/application.rb.
+
+  # Base URL for downstream auth service
   config.authsvc_base_url = "https://authsvcmock.petpal.mobi"
 
-  # Settings specified here will take precedence over those in config/application.rb.
+  # Redis
+  config.redishost = "localhost"
+  config.redisport = "6379"
 
   # The test environment is used exclusively to run your application's
   # test suite. You never need to work with it otherwise. Remember that

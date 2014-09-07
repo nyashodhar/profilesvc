@@ -1,9 +1,14 @@
 Rails.application.configure do
 
-  # Base URL for downstrean auth service
+  # Settings specified here will take precedence over those in config/application.rb.
+
+  # Base URL for downstream auth service
   config.authsvc_base_url = "https://authsvc.petpal.mobi"
 
-  # Settings specified here will take precedence over those in config/application.rb.
+  # Redis
+  # TODO: THIS NEEDS TO BE UPDATED
+  config.redishost = "localhost"
+  config.redisport = "6379"
 
   # Code is not reloaded between requests.
   config.cache_classes = true

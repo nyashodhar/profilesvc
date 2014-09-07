@@ -1,9 +1,13 @@
 Rails.application.configure do
 
-  # Base URL for downstrean auth service
+  # Settings specified here will take precedence over those in config/application.rb.
+
+  # Base URL for downstream auth service
   config.authsvc_base_url = "https://authpetpalci.herokuapp.com"
 
-  # Settings specified here will take precedence over those in config/application.rb.
+  # Redis
+  config.redishost = "localhost"
+  config.redisport = "6379"
 
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development
