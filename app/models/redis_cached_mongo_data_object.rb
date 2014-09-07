@@ -32,6 +32,10 @@ class RedisCachedMongoDataObject
     @field_hash[field] = value
   end
 
+  def set_fields(arguments)
+    build_field_hash_from_args(arguments)
+  end
+
   #
   # This is a factory method that will produce an object
   # instance based on a record found in mongo
@@ -75,7 +79,7 @@ class RedisCachedMongoDataObject
 
     # Check that all the args given are valid for the object
     arguments.keys.each { |arg_key|
-      if(my_ordered_fields[arg_key].blank?)
+      if(my_ordered_fields[arg_key] == nil)
         raise("Field #{arg_key} is not a valid field. Valid fields are: #{my_ordered_fields.keys}")
       end
     }

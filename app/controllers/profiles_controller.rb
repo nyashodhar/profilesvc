@@ -11,22 +11,35 @@ class ProfilesController < AuthenticatedController
   #
   # EXAMPLE:
   #
-  # curl -v -X POST http://127.0.0.1:3000/profile -H "Accept: application/json" -H "Content-Type: application/json" -H "X-User-Token: a6XK1qPfwyNd_HqjsgSS" -d '{"firstname":"Frank"}'
+  # curl -v -X POST http://127.0.0.1:3000/profile -H "Accept: application/json" -H "Content-Type: application/json" -H "X-User-Token: a6XK1qPfwyNd_HqjsgSS" -d '{"first_name":"Frank", "last_name":"Prank"}'
   ####################################################
   def createOrUpdate
 
-    #logger.info "*** Yay, we're authenticated"
-    #logger.info "*** @authenticated_user_id = #{@authenticated_user_id}"
+    # TODO: Find a way to propagate error (400 vs 500 etc)
 
-    #profile = Profile.new(:id => 7, :first_name => 'Frank', :last_name => 'Tank')
-    #STDOUT.write "*** profile.serialize = #{profile.serialize}\n"
-    #profile.store
+    profile_request_args = request.params[:profile]
 
-    #profile = Profile.find_by_id(7)
-    #STDOUT.write "*** profile.serialize = #{profile.serialize}\n"
-    #STDOUT.write "*** profile.class = #{profile.class}\n"
-    #profile.set_field(:first_name, "Hank")
-    #profile.store
+    object_update_args = Hash.new
+    object_update_args[:id] = @authenticated_user_id
+
+    if(!profile_request_args[:first_name].blank?)
+      object_update_args[:first_name] = profile_request_args[:first_name]
+    end
+
+    if(!profile_request_args[:last_name].blank?)
+      object_update_args[:last_name] = profile_request_args[:last_name]
+    end
+
+    profile_to_update = Profile.find_by_id(@authenticated_user_id)
+    if(profile_to_update.blank?)
+      # We'll be creating a new one..
+      profile_to_update = Profile.new(object_update_args)
+    else
+      # Set our values on the existing one
+      profile_to_update.set_fields(object_update_args)
+    end
+
+    profile_to_update.store
 
     the_response = {:status => "updated"}.to_json
     render :status => 201, :json => the_response

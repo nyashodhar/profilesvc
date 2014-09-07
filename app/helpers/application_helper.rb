@@ -1,7 +1,7 @@
 module ApplicationHelper
 
   ########################################################################
-  # This method is in use ALL PROTECTED APIS.
+  # This method is in use for ALL PROTECTED APIS.
   #
   # If something goes wrong this method will render one of the two
   # following errors back to the client.

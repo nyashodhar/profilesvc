@@ -16,8 +16,9 @@ class CatchUnexpectedErrors
       @app.call(env)
     rescue SyntaxError => error
       return handleError(error)
-
     rescue NameError => error
+      return handleError(error)
+    rescue RuntimeError => error
       return handleError(error)
     end
   end
