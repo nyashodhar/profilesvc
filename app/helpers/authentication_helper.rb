@@ -1,4 +1,4 @@
-module ApplicationHelper
+module AuthenticationHelper
 
   ########################################################################
   # This method is in use for ALL PROTECTED APIS.

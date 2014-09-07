@@ -1,6 +1,6 @@
 class AuthenticatedController < ActionController::Base
 
-  include ApplicationHelper
+  include AuthenticationHelper
 
   #
   # Note: This filter will do a downstream request to the auth service to
