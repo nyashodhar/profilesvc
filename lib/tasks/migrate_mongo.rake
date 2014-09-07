@@ -3,8 +3,9 @@ include Mongo
 
 require "#{Rails.root}/app/helpers/mongo_loader"
 require "#{Rails.root}/lib/tasks/util/mongo_migration"
+require "#{Rails.root}/lib/tasks/util/mongo_task_initializer"
 
-include MongoLoader
+include MongoTaskInitializer
 
 #
 # USAGE:
@@ -14,13 +15,8 @@ include MongoLoader
 namespace :db do
   task :migrate_mongo, [:stage, :migration_level] do |t, args|
 
-    the_environment = args[:stage]
+    the_environment = initialize_mongo(args)
     migration_level = args[:migration_level]
-
-    unless the_environment
-      STDOUT.write "ERROR: Must provide an environment\n"
-      exit
-    end
 
     unless migration_level
       STDOUT.write "ERROR: Must provide a migration level\n"
@@ -29,8 +25,6 @@ namespace :db do
 
     STDOUT.write "=> Running mongodb migration for environment #{the_environment}\n"
     STDOUT.write "=> Migration level: #{migration_level}\n"
-
-    load_mongo(the_environment)
 
     migrations_path = "#{Rails.root}/db/mongo_migration"
     version_to_object = get_migrations(migrations_path, migration_level)
@@ -57,7 +51,7 @@ namespace :db do
 
     version_to_object = Hash.new
 
-    migrations = files.map do |file|
+    files.map do |file|
       version, name = file.scan(/([0-9]+)_([_a-z0-9]*)\.?([_a-z0-9]*)?\.rb\z/).first
 
       raise "Could not parse migration level from file name #{file}" unless version
