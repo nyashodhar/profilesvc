@@ -1,13 +1,4 @@
-class ProfilesController < ActionController::Base
-
-  include ApplicationHelper
-
-  #
-  # Note: This filter will do a downstream request to the auth service to
-  # check that there is a sign-in for the auth token, and that the sign-in
-  # is not expired
-  #
-  before_action :ensureAuthorized
+class ProfilesController < AuthenticatedController
 
   ####################################################
   # Create or update profile
@@ -23,7 +14,9 @@ class ProfilesController < ActionController::Base
   # curl -v -X POST http://127.0.0.1:3000/profile -H "Accept: application/json" -H "Content-Type: application/json" -H "X-User-Token: a6XK1qPfwyNd_HqjsgSS" -d '{"firstname":"Frank"}'
   ####################################################
   def createOrUpdate
-    logger.info "Update request handled"
+
+    #logger.info "*** Yay, we're authenticated"
+    #logger.info "*** @authenticated_user_id = #{@authenticated_user_id}"
 
     #profile = Profile.new(:id => 7, :first_name => 'Frank', :last_name => 'Tank')
     #STDOUT.write "*** profile.serialize = #{profile.serialize}\n"

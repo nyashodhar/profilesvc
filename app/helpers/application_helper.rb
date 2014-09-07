@@ -48,6 +48,9 @@ module ApplicationHelper
         return
       end
 
+      # Make the id of the authenticated user available inside the controller's action:
+      set_authenticated_user_id(auth_service_response_hash['id'])
+
       # SUCCESS - Control flow will now enter the controller's action
       logger.info "ensureAuthorized(): Auth service success. CODE: #{auth_service_response.code}, USERID: #{auth_service_response_hash['id']}"
       return
