@@ -179,6 +179,15 @@ module AuthServiceMockHelper
     return { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json', 'X-User-Token' => auth_token}
   end
 
+  #########################################
+  # Create a hash containing the headers
+  # to be used in a GET request
+  #########################################
+  def create_get_headers_with_auth_token(auth_token)
+    validate_auth_token(auth_token)
+    return {'Content-Type' => 'application/json', 'Accept' => 'application/json', 'X-User-Token' => auth_token}
+  end
+
   def validate_auth_token(auth_token)
     if(auth_token.blank?)
       raise 'Parameter auth_token not specified'

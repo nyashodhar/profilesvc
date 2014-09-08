@@ -1,6 +1,30 @@
 class ProfilesController < AuthenticatedController
 
   ####################################################
+  # Look up the profile for the authenticated user
+  #
+  # GET /profile
+  #
+  # - 401 if not authenticated
+  # - 404 if profile not found (perhaps not yet created)
+  # - 200 if request was processed successfully
+  #
+  # EXAMPLE:
+  #
+  # curl -v -X GET http://127.0.0.1:3000/profile -H "Accept: application/json" -H "Content-Type: application/json" -H "X-User-Token: kxDZQAp7_Bpink7L3ynE"
+  ####################################################
+  def get_profile
+    profile = Profile.find_by_id(@authenticated_user_id)
+    if(profile.blank?)
+      logger.info "Could not find profile for user #{@authenticated_user_id}"
+      render :status => 404, :json => I18n.t("404response_resource_not_found")
+    else
+      render :status => 200, :json => profile.serialize()
+    end
+  end
+
+
+  ####################################################
   # Create or update profile
   #
   # POST /profile
