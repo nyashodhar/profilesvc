@@ -30,7 +30,7 @@ class ProfilesController < AuthenticatedController
   # POST /profile
   #
   # - 401 if not authenticated
-  # - 400 if request has a problem
+  # - 422 if the request has a problem
   # - 201 if request was processed successfully
   #
   # EXAMPLE:
@@ -39,7 +39,30 @@ class ProfilesController < AuthenticatedController
   ####################################################
   def createOrUpdate
 
-    # TODO: Find a way to propagate error (400 vs 500 etc)
+    object_update_args = prepare_profile_update_args
+
+    profile_to_update = Profile.find_by_id(@authenticated_user_id)
+    if(profile_to_update.blank?)
+      # We'll be creating a new one..
+      profile_to_update = Profile.new(object_update_args)
+    else
+      profile_to_update.set_fields(object_update_args)
+    end
+
+    if(profile_to_update.has_validation_errors)
+      # Note: The validation errors from the data object are already localized
+      render :status => 422, :json => { :error => profile_to_update.get_validation_errors }
+      return
+    end
+
+    profile_to_update.store
+
+    render :status => 201, :json => profile_to_update.serialize
+  end
+
+  private
+
+  def prepare_profile_update_args
 
     profile_request_args = request.params[:profile]
 
@@ -54,18 +77,7 @@ class ProfilesController < AuthenticatedController
       object_update_args[:last_name] = profile_request_args[:last_name]
     end
 
-    profile_to_update = Profile.find_by_id(@authenticated_user_id)
-    if(profile_to_update.blank?)
-      # We'll be creating a new one..
-      profile_to_update = Profile.new(object_update_args)
-    else
-      # Set our values on the existing one
-      profile_to_update.set_fields(object_update_args)
-    end
-
-    profile_to_update.store
-
-    the_response = {:status => "updated"}.to_json
-    render :status => 201, :json => the_response
+    return object_update_args
   end
+
 end

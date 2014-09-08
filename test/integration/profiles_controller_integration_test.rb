@@ -23,8 +23,8 @@ class ProfilesControllerIntegrationTest < ActionDispatch::IntegrationTest
     post "profile", profile_name_update_body, profile_update_headers
     assert_response :created
     the_response = JSON.parse(response.body)
-    assert_not_nil(the_response["status"])
-    assert(the_response["status"].eql?("updated"))
+    assert_not_nil(the_response["first_name"])
+    assert(the_response["first_name"].eql?("Frank"))
   end
 
 end
