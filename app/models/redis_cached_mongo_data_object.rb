@@ -58,30 +58,56 @@ class RedisCachedMongoDataObject
 
   #
   # This is a factory method that will produce an object
-  # instance based on a record found in mongo
+  # instance based on redic cache or mongo.
   #
-  def self.find_by_id(id)
+  # If the object is found in redis, it's returned directly.
+  #
+  # If the object is not found in redis, but is found in mongo
+  # the redis cache is updated before the object is returned
+  #
+  # It makes no sense to update the redis cache if this method
+  # is called as part of an update. In this case, the
+  # update_cache parameter should be set to false
+  #
+  def self.find_by_id(id, update_cache=true)
 
-    doc = static_find_in_mongo(id)
-    if(doc.blank?)
-      return nil
+    object_hash = static_find_in_redis(id)
+    cache_hit = false
+    if(!object_hash.blank?)
+      @@logger.info "Cache hit for #{self.to_s} #{id} in redis"
+      cache_hit = true
+    else
+      object_hash = static_find_in_mongo(id)
+      if(object_hash.blank?)
+        @@logger.info "#{self.to_s} #{id} not found in redis or mongo"
+        return nil
+      end
     end
 
     hash_with_symbol_keys = Hash.new
 
     # Convert each key into a symbol
-    doc.keys.each { |arg_key|
+    object_hash.keys.each { |arg_key|
       symbol_key = arg_key.to_sym
-      hash_with_symbol_keys[symbol_key] = doc[arg_key]
+      hash_with_symbol_keys[symbol_key] = object_hash[arg_key]
     }
 
     # Filter out the mongo _id field here
     hash_with_symbol_keys.delete(:_id)
 
+    if(!cache_hit && update_cache)
+      #
+      # It was not a cache hit, so we must have found the object
+      # in mongo, add the object to the redis cache.
+      #
+      static_store_in_redis(hash_with_symbol_keys)
+    end
+
     # Create a new instance - but validation of the field values will be skipped
     data_object = self.new(hash_with_symbol_keys, false)
     return data_object
   end
+
 
   private
 
@@ -185,6 +211,32 @@ class RedisCachedMongoDataObject
     return doc
   end
 
+  def self.static_find_in_redis(id)
+
+    redis_key = "#{self.to_s}_#{id}"
+
+    #
+    # Error during lookup of cached item in redis should not result in a 500 error
+    # Therefore do not allow the error float from there
+    #
+
+    redis_key = "#{self.to_s}_#{id}"
+
+    begin
+      #field_hash_from_redis = $redis.hgetall redis_key
+      json_from_redis = $redis.get(redis_key)
+      if(json_from_redis.blank?)
+        return nil
+      end
+      field_hash_from_redis = JSON.parse(json_from_redis)
+      return field_hash_from_redis
+    rescue => e
+      trace = e.backtrace[0,10].join("\n")
+      @@logger.error "ERROR when looking up #{self.to_s} #{id} in redis. MESSAGE: #{e.message} - TRACE: #{trace}\n"
+    end
+
+    return nil
+  end
 
   def store_in_mongo
 
@@ -253,7 +305,19 @@ class RedisCachedMongoDataObject
     redis_key = "#{self.class}_#{@field_hash[:id]}"
 
     begin
-      redis_result = $redis.mapped_hmset(redis_key, @field_hash)
+
+      #
+      # Using redis hash is only option if we want to switch to all strings
+      # Redis stores all the items in the cache as strings, so using hash
+      # would require to do type conversion if we want to use types in mongo
+      #
+      # If we don't care about using types in mongo, then we can switch to
+      # storing the data in hashes and not just opaque JSON. By storing in
+      # opaque JSON we don't lose the mongo typing.
+      #
+
+      #redis_result = $redis.mapped_hmset(redis_key, @field_hash)
+      redis_result = $redis.set(redis_key, @field_hash.to_json)
       # The redis result is a String, expected result is "OK"
       if(!redis_result.eql?("OK"))
         @@logger.error "ERROR when storing #{self.class} #{@field_hash[:id]} in redis, object will not be cached. Result: #{redis_result}"
@@ -263,6 +327,27 @@ class RedisCachedMongoDataObject
     rescue => e
       trace = e.backtrace[0,10].join("\n")
       @@logger.error "ERROR when storing #{self.class} #{@field_hash[:id]} in redis, object will not be cached. MESSAGE: #{e.message} - TRACE: #{trace}\n"
+    end
+  end
+
+
+  def self.static_store_in_redis(object_hash)
+
+    redis_key = "#{self.to_s}_#{object_hash[:id]}"
+
+    begin
+      #redis_result = $redis.mapped_hmset(redis_key, object_hash)
+      redis_result = $redis.set(redis_key, object_hash.to_json)
+
+      # The redis result is a String, expected result is "OK"
+      if(!redis_result.eql?("OK"))
+        @@logger.error "ERROR - static_store_in_redis() failed when storing #{self.to_s} #{object_hash[:id]} in redis , object will not be cached. Result: #{redis_result}"
+      else
+        @@logger.info "#{self.to_s} #{object_hash[:id]} saved in redis using key #{redis_key}"
+      end
+    rescue => e
+      trace = e.backtrace[0,10].join("\n")
+      @@logger.error "ERROR - static_store_in_redis() failed when storing #{self.to_s} #{object_hash[:id]} in redis, object will not be cached. MESSAGE: #{e.message} - TRACE: #{trace}\n"
     end
   end
 

@@ -46,7 +46,7 @@ class ProfilesController < AuthenticatedController
 
     object_update_args = prepare_profile_update_args
 
-    profile_to_update = Profile.find_by_id(@authenticated_user_id)
+    profile_to_update = Profile.find_by_id(@authenticated_user_id, false)
     if(profile_to_update.blank?)
       # We'll be creating a new one..
       profile_to_update = Profile.new(object_update_args)
