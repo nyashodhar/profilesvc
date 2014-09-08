@@ -4,15 +4,15 @@ class RedisCachedMongoDataObject
   JSON_DOC_ARG = :json_doc;
 
   @@ordered_fields = ActiveSupport::OrderedHash.new()
-  @@ordered_fields[:id] = true
+  @@ordered_fields[:id] = {:required => true, :type => Fixnum}
 
   #
   # Kind of cool hint from here:
   # http://stackoverflow.com/questions/2371044/ruby-methods-and-ordering-of-multiple-default-values
   #
 
-  def initialize(arguments = {})
-    build_field_hash_from_args(arguments)
+  def initialize(arguments = {}, validate_fields=true)
+    build_field_hash_from_args(arguments, validate_fields)
   end
 
   def serialize
@@ -33,7 +33,7 @@ class RedisCachedMongoDataObject
   end
 
   def set_fields(arguments)
-    build_field_hash_from_args(arguments)
+    build_field_hash_from_args(arguments, true)
   end
 
   #
@@ -58,31 +58,57 @@ class RedisCachedMongoDataObject
     # Filter out the mongo _id field here
     hash_with_symbol_keys.delete(:_id)
 
-    # Create a new instance
-    data_object = self.new(hash_with_symbol_keys)
+    # Create a new instance - but validation of the field values will be skipped
+    data_object = self.new(hash_with_symbol_keys, false)
     return data_object
   end
 
   private
 
-  def build_field_hash_from_args(arguments)
+  def build_field_hash_from_args(arguments, validate_fields)
 
     my_ordered_fields = get_ordered_fields
 
-    # Check that all required fields are present?
-    my_ordered_fields.keys.each { |field_name|
-      is_required = my_ordered_fields[field_name]
-      if(is_required && arguments[field_name].blank?)
-        raise("Field #{field_name} is required and was not specified in the args (#{arguments}")
-      end
-    }
-
-    # Check that all the args given are valid for the object
+    # Check that all the args given are known fields for this object
     arguments.keys.each { |arg_key|
       if(my_ordered_fields[arg_key] == nil)
         raise("Field #{arg_key} is not a valid field. Valid fields are: #{my_ordered_fields.keys}")
       end
     }
+
+    #
+    # All the fields given are known to be part of this object.
+    # If we are invoked as part of a factory method that creates
+    # an instance based on existing records, we will skip validation
+    # of the values provided for each field here.
+    #
+    # Validation on the values is only done when an object is being
+    # created or updated.
+    #
+
+    if(validate_fields == true)
+      # Do validation of the values of each field
+      my_ordered_fields.keys.each { |field_name|
+
+        arg = arguments[field_name]
+
+        is_required = my_ordered_fields[field_name][:required]
+        if(is_required && arg == nil)
+          raise("Field #{field_name} is required and was not specified in the args (#{arguments}")
+        end
+
+        if(arg != nil)
+          expected_type = my_ordered_fields[field_name][:type]
+          if(!expected_type.blank? && arg.class != expected_type)
+            raise("Field #{field_name} is of type #{arg.class} but type #{expected_type} is expected")
+          end
+          max_length = my_ordered_fields[field_name][:max_length]
+          if(!max_length.blank? && arg.to_s.length > max_length)
+            raise("Field #{field_name} has length #{arg.to_s.length} but max length allowed is #{max_length}")
+          end
+        end
+      }
+    end
 
     # Everything is cool, accept the args
     @field_hash = Hash.new

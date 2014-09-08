@@ -80,7 +80,7 @@ module AuthServiceMockHelper
     # 200 - and the response echoes the auth token in JSON
     #
     auth_request_good_headers = {'Content-Type' => 'application/json', 'X-User-Token' => 'GOOD', 'Accept' => 'application/json'}
-    auth_success_response = { :id => '1', :email => 'integration@test.com', :authentication_token => 'GOOD'}.to_json
+    auth_success_response = { :id => 1, :email => 'integration@test.com', :authentication_token => 'GOOD'}.to_json
 
     stub_request(:get, auth_url).with(:headers => auth_request_good_headers).to_return {
         |request| {:status => 200, :body => auth_success_response}
@@ -116,7 +116,7 @@ module AuthServiceMockHelper
     # 200 - BUT the response does not echoe the auth token in JSON
     #
     auth_request_good_headers = {'Content-Type' => 'application/json', 'X-User-Token' => 'GOOD', 'Accept' => 'application/json'}
-    auth_success_response = { :id => '1', :email => 'integration@test.com', :authentication_token => 'GOODPlusStuff'}.to_json
+    auth_success_response = { :id => 1, :email => 'integration@test.com', :authentication_token => 'GOODPlusStuff'}.to_json
 
     stub_request(:get, auth_url).with(:headers => auth_request_good_headers).to_return {
         |request| {:status => 200, :body => auth_success_response}
