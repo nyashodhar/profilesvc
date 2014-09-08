@@ -27,6 +27,10 @@ class RedisCachedMongoDataObject
     end
 
     store_in_mongo()
+
+    # Mongo storage was successful, store it in redis as well.
+    store_in_redis()
+
   end
 
   def has_validation_errors
@@ -221,10 +225,45 @@ class RedisCachedMongoDataObject
     upserted = !insert_or_update_result['upserted'].blank?
 
     if(number_of_updated_records != 1 && !upserted)
-      raise "Could not store doc #{doc} in mongo. No upsert happened, and #{number_of_updated_records} records were updated, 1 record should have been updated or inserted"
+      raise "Could not store #{self.class} doc #{doc} in mongo. No upsert happened, and #{number_of_updated_records} records were updated, 1 record should have been updated or inserted"
     end
 
+    @@logger.info "#{self.class} #{@field_hash[:id]} saved in mongo"
+
     return true
+  end
+
+
+  def store_in_redis
+
+    #
+    # Example:
+    #
+    #  How to query for a profile in redis
+    #
+    #  redis-cli
+    #  > hgetall Profile_12
+    #
+
+    #
+    # Failure to store in redis should not be allowed to result 500 error
+    # Therefore do not allow the error float from there
+    #
+
+    redis_key = "#{self.class}_#{@field_hash[:id]}"
+
+    begin
+      redis_result = $redis.mapped_hmset(redis_key, @field_hash)
+      # The redis result is a String, expected result is "OK"
+      if(!redis_result.eql?("OK"))
+        @@logger.error "ERROR when storing #{self.class} #{@field_hash[:id]} in redis, object will not be cached. Result: #{redis_result}"
+      else
+        @@logger.info "#{self.class} #{@field_hash[:id]} saved in redis using key #{redis_key}"
+      end
+    rescue => e
+      trace = e.backtrace[0,10].join("\n")
+      @@logger.error "ERROR when storing #{self.class} #{@field_hash[:id]} in redis, object will not be cached. MESSAGE: #{e.message} - TRACE: #{trace}\n"
+    end
   end
 
 end
