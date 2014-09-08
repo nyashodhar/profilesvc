@@ -1,7 +1,6 @@
 class RedisCachedMongoDataObject
 
-  # Special arg, used to initialize from JSON
-  JSON_DOC_ARG = :json_doc;
+  @@logger = Rails.application.config.logger
 
   @@ordered_fields = ActiveSupport::OrderedHash.new()
   @@ordered_fields[:id] = {:required => true, :type => Fixnum}
@@ -12,6 +11,7 @@ class RedisCachedMongoDataObject
   #
 
   def initialize(arguments = {}, validate_fields=true)
+    @validation_errors = Array.new
     build_field_hash_from_args(arguments, validate_fields)
   end
 
@@ -21,7 +21,35 @@ class RedisCachedMongoDataObject
 
   def store
     ### TODO: Implement hybrid mongo/redis operation
+
+    if(!@validation_errors.blank?)
+      @@logger.error "Object #{serialize} can't be stored due to validation errors #{@validation_errors}"
+      return
+    end
+
     store_in_mongo()
+  end
+
+  def has_validation_errors
+    return !@validation_errors.empty?
+  end
+
+  def get_validation_errors
+    if(@validation_errors.empty?)
+      return nil
+    end
+    return @validation_errors.clone
+  end
+
+  def has_storage_errors
+    return @storage_errors.empty?
+  end
+
+  def get_storage_errors
+    if(@storage_errors.empty?)
+      return nil
+    end
+    return @storage_errors.clone
   end
 
   def set_field(field, value)
@@ -72,7 +100,8 @@ class RedisCachedMongoDataObject
     # Check that all the args given are known fields for this object
     arguments.keys.each { |arg_key|
       if(my_ordered_fields[arg_key] == nil)
-        raise("Field #{arg_key} is not a valid field. Valid fields are: #{my_ordered_fields.keys}")
+        @validation_errors.push("Field #{arg_key} is not a valid field")
+        @@logger.error "Field #{arg_key} is not a valid field. Valid fields are: #{my_ordered_fields.keys}"
       end
     }
 
@@ -94,23 +123,31 @@ class RedisCachedMongoDataObject
 
         is_required = my_ordered_fields[field_name][:required]
         if(is_required && arg == nil)
-          raise("Field #{field_name} is required and was not specified in the args (#{arguments}")
+          @validation_errors.push("Field #{field_name} is required")
+          @@logger.error "Field #{field_name} is required and was not specified in the args (#{arguments}"
         end
 
         if(arg != nil)
           expected_type = my_ordered_fields[field_name][:type]
           if(!expected_type.blank? && arg.class != expected_type)
-            raise("Field #{field_name} is of type #{arg.class} but type #{expected_type} is expected")
+            @validation_errors.push("Field #{field_name} has invalid type")
+            @@logger.error "Field #{field_name} is of type #{arg.class} but type #{expected_type} is expected"
           end
           max_length = my_ordered_fields[field_name][:max_length]
           if(!max_length.blank? && arg.to_s.length > max_length)
-            raise("Field #{field_name} has length #{arg.to_s.length} but max length allowed is #{max_length}")
+            @validation_errors.push("Field #{field_name} has invalid length")
+            @@logger.error "Field #{field_name} has length #{arg.to_s.length} but max length allowed is #{max_length}"
           end
         end
       }
     end
 
-    # Everything is cool, accept the args
+    #
+    # Keep the args in our hash.
+    # Note that there could be validation errors.
+    # The store operation will not be allowed on this object if there are validation errors
+    #
+
     @field_hash = Hash.new
     arguments.keys.each { |arg_key|
       @field_hash[arg_key] = arguments[arg_key]
