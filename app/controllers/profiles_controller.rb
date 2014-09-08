@@ -27,7 +27,12 @@ class ProfilesController < AuthenticatedController
   ####################################################
   # Create or update profile
   #
-  # POST /profile
+  # This action supports both POST and PUT. The implementation
+  # is identical since the underlying implementation is using
+  # and 'upsert' operation that can handle both initial creation
+  # update to existing record.
+  #
+  # POST /profile OR PUT /profile
   #
   # - 401 if not authenticated
   # - 422 if the request has a problem
@@ -37,7 +42,7 @@ class ProfilesController < AuthenticatedController
   #
   # curl -v -X POST http://127.0.0.1:3000/profile -H "Accept: application/json" -H "Content-Type: application/json" -H "X-User-Token: a6XK1qPfwyNd_HqjsgSS" -d '{"first_name":"Frank", "last_name":"Prank"}'
   ####################################################
-  def createOrUpdate
+  def create_or_update
 
     object_update_args = prepare_profile_update_args
 

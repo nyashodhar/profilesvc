@@ -3,7 +3,8 @@ Rails.application.routes.draw do
   # ProfilesController:
   #===============================
   get 'profile', to: 'profiles#get_profile', as: 'get_profile'
-  post 'profile', to: 'profiles#createOrUpdate', as: 'createOrUpdate'
+  post 'profile', to: 'profiles#create_or_update', as: 'create_profile'
+  put 'profile', to: 'profiles#create_or_update', as: 'update_profile'
 
   # DeploymentsController:
   #===============================
