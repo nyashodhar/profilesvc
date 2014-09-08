@@ -40,17 +40,6 @@ class RedisCachedMongoDataObject
     return @validation_errors.clone
   end
 
-  def has_storage_errors
-    return !(@storage_errors == nil || @storage_errors.empty?)
-  end
-
-  def get_storage_errors
-    if(@storage_errors == nil || @storage_errors.empty?)
-      return nil
-    end
-    return @storage_errors.clone
-  end
-
   def set_field(field, value)
     my_ordered_fields = get_ordered_fields
     if(my_ordered_fields[field].blank?)
