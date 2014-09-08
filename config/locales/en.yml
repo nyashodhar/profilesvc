@@ -24,3 +24,11 @@ en:
   401response: "Not authorized"
   404response_resource_not_found: "Resource not found"
   500response_internal_server_error: "Internal Server Error"
+
+  #
+  # Data object validation errors
+  #
+  data_object_not_valid_field: "Field %{field_name} is not a valid field"
+  data_object_field_is_required: "Field %{field_name} is required"
+  data_object_field_has_invalid_type: "Field %{field_name} has invalid type"
+  data_object_field_has_invalid_length: "Field %{field_name} has invalid length"

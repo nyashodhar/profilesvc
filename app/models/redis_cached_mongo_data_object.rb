@@ -11,7 +11,6 @@ class RedisCachedMongoDataObject
   #
 
   def initialize(arguments = {}, validate_fields=true)
-    @validation_errors = Array.new
     build_field_hash_from_args(arguments, validate_fields)
   end
 
@@ -31,22 +30,22 @@ class RedisCachedMongoDataObject
   end
 
   def has_validation_errors
-    return !@validation_errors.empty?
+    return !(@validation_errors == nil || @validation_errors.empty?)
   end
 
   def get_validation_errors
-    if(@validation_errors.empty?)
+    if(@validation_errors == nil || @validation_errors.empty?)
       return nil
     end
     return @validation_errors.clone
   end
 
   def has_storage_errors
-    return @storage_errors.empty?
+    return !(@storage_errors == nil || @storage_errors.empty?)
   end
 
   def get_storage_errors
-    if(@storage_errors.empty?)
+    if(@storage_errors == nil || @storage_errors.empty?)
       return nil
     end
     return @storage_errors.clone
@@ -97,10 +96,13 @@ class RedisCachedMongoDataObject
 
     my_ordered_fields = get_ordered_fields
 
+    @validation_errors = Array.new
+
     # Check that all the args given are known fields for this object
     arguments.keys.each { |arg_key|
       if(my_ordered_fields[arg_key] == nil)
-        @validation_errors.push("Field #{arg_key} is not a valid field")
+        @validation_errors.push(I18n.t("data_object_not_valid_field", :field_name => arg_key))
+        #@validation_errors.push("Field #{arg_key} is not a valid field")
         @@logger.error "Field #{arg_key} is not a valid field. Valid fields are: #{my_ordered_fields.keys}"
       end
     }
@@ -123,19 +125,19 @@ class RedisCachedMongoDataObject
 
         is_required = my_ordered_fields[field_name][:required]
         if(is_required && arg == nil)
-          @validation_errors.push("Field #{field_name} is required")
-          @@logger.error "Field #{field_name} is required and was not specified in the args (#{arguments}"
+          @validation_errors.push(I18n.t("data_object_field_is_required", :field_name => field_name))
+          @@logger.error "Field #{field_name} is required and was not specified in the args #{arguments}"
         end
 
         if(arg != nil)
           expected_type = my_ordered_fields[field_name][:type]
           if(!expected_type.blank? && arg.class != expected_type)
-            @validation_errors.push("Field #{field_name} has invalid type")
+            @validation_errors.push(I18n.t("data_object_field_has_invalid_type", :field_name => field_name))
             @@logger.error "Field #{field_name} is of type #{arg.class} but type #{expected_type} is expected"
           end
           max_length = my_ordered_fields[field_name][:max_length]
           if(!max_length.blank? && arg.to_s.length > max_length)
-            @validation_errors.push("Field #{field_name} has invalid length")
+            @validation_errors.push(I18n.t("data_object_field_has_invalid_length", :field_name => field_name))
             @@logger.error "Field #{field_name} has length #{arg.to_s.length} but max length allowed is #{max_length}"
           end
         end
