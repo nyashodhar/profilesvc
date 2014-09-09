@@ -19,7 +19,6 @@ class RedisCachedMongoDataObject
   end
 
   def store
-    ### TODO: Implement hybrid mongo/redis operation
 
     if(!@validation_errors.blank?)
       @@logger.error "Object #{serialize} can't be stored due to validation errors #{@validation_errors}"
@@ -313,7 +312,10 @@ class RedisCachedMongoDataObject
       #
       # If we don't care about using types in mongo, then we can switch to
       # storing the data in hashes and not just opaque JSON. By storing in
-      # opaque JSON we don't lose the mongo typing.
+      # opaque JSON we can at least keep string vs number type although
+      # all other complex typing is out of the window here....:(
+      #
+      # This probably needs to be revisited...
       #
 
       #redis_result = $redis.mapped_hmset(redis_key, @field_hash)
