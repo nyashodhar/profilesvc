@@ -231,7 +231,7 @@ class RedisCachedMongoDataObject
       return field_hash_from_redis
     rescue => e
       trace = e.backtrace[0,10].join("\n")
-      @@logger.error "ERROR when looking up #{self.to_s} #{id} in redis. MESSAGE: #{e.message} - TRACE: #{trace}\n"
+      @@logger.error "ERROR when looking up #{self.to_s} #{id} in redis. MESSAGE: #{e.message} - TRACE: #{trace}"
     end
 
     return nil
@@ -328,7 +328,7 @@ class RedisCachedMongoDataObject
       end
     rescue => e
       trace = e.backtrace[0,10].join("\n")
-      @@logger.error "ERROR when storing #{self.class} #{@field_hash[:id]} in redis, object will not be cached. MESSAGE: #{e.message} - TRACE: #{trace}\n"
+      @@logger.error "ERROR when storing #{self.class} #{@field_hash[:id]} in redis, object will not be cached. MESSAGE: #{e.message} - TRACE: #{trace}"
     end
   end
 
@@ -349,7 +349,7 @@ class RedisCachedMongoDataObject
       end
     rescue => e
       trace = e.backtrace[0,10].join("\n")
-      @@logger.error "ERROR - static_store_in_redis() failed when storing #{self.to_s} #{object_hash[:id]} in redis, object will not be cached. MESSAGE: #{e.message} - TRACE: #{trace}\n"
+      @@logger.error "ERROR - static_store_in_redis() failed when storing #{self.to_s} #{object_hash[:id]} in redis, object will not be cached. MESSAGE: #{e.message} - TRACE: #{trace}"
     end
   end
 

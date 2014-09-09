@@ -15,7 +15,7 @@ class CatchJsonParseErrors
       @app.call(env)
     rescue ActionDispatch::ParamsParser::ParseError => error
 
-      @logger.error "CatchJsonParseErrors: A JSON parse error occurred: #{error}\n"
+      @logger.error "CatchJsonParseErrors: A JSON parse error occurred: #{error}"
       error_output = I18n.t("400response_middleware_invalid_json")
 
       return [

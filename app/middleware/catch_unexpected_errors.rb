@@ -27,7 +27,7 @@ class CatchUnexpectedErrors
 
   def handleError(error)
     trace = error.backtrace[0,10].join("\n")
-    @logger.error "CatchUnexpectedErrors: Error: #{error.class.name} : #{error.message}. Trace:\n#{trace}\n"
+    @logger.error "CatchUnexpectedErrors: Error: #{error.class.name} : #{error.message}. Trace:\n#{trace}"
     error_output = I18n.t("500response_internal_server_error")
 
     return [

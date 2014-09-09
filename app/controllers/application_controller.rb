@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
 
   def error(e)
     trace = e.backtrace[0,10].join("\n")
-    logger.error "Custom error handler - Error: #{e.class.name} : #{e.message}, Trace: #{trace}\n"
+    logger.error "Custom error handler - Error: #{e.class.name} : #{e.message}, Trace: #{trace}"
     render :status => 500, :json => {:error => I18n.t("500response_internal_server_error")}
   end
 
