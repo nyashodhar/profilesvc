@@ -6,8 +6,23 @@ Rails.application.configure do
   config.authsvc_base_url = "https://authpetpalci.herokuapp.com"
 
   # Redis
-  config.redishost = "localhost"
-  config.redisport = "6379"
+  config.redis_host = "localhost"
+  config.redis_port = "6379"
+
+  #
+  # Setting this to true means:
+  #
+  #   1) redis.conf has a password specified, e.g.
+  #
+  #         masterauth test123
+  #
+  #   2) The slaves are required to provide a password
+  #      when connecting to the master, e.g. in redis.conf:
+  #
+  #         requirepass test123
+  #
+  config.redis_password_required = true
+  config.redis_password = "test123"
 
   # In the development environment your application's code is reloaded on
   # every request. This slows down response time but is perfect for development

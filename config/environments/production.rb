@@ -6,9 +6,24 @@ Rails.application.configure do
   config.authsvc_base_url = "https://authsvc.petpal.mobi"
 
   # Redis
-  # TODO: THIS NEEDS TO BE UPDATED
-  config.redishost = "localhost"
-  config.redisport = "6379"
+  # TODO: THE REDIS CONFIG NEEDS TO BE UPDATED LATER FOR THIS ENVIRONMENT
+  config.redis_host = "localhost"
+  config.redis_port = "6379"
+
+  #
+  # Setting this to true means:
+  #
+  #   1) redis.conf has a password specified, e.g.
+  #
+  #         masterauth supersecretpassword123
+  #
+  #   2) The slaves are required to provide a password
+  #      when connecting to the master, e.g. in redis.conf:
+  #
+  #         requirepass supersecretpassword123
+  #
+  config.redis_password_required = true
+  config.redis_password = "test123"
 
   # Code is not reloaded between requests.
   config.cache_classes = true

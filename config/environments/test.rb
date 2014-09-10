@@ -6,8 +6,23 @@ Rails.application.configure do
   config.authsvc_base_url = "https://authsvcmock.petpal.mobi"
 
   # Redis
-  config.redishost = "localhost"
-  config.redisport = "6379"
+  config.redis_host = "localhost"
+  config.redis_port = "6379"
+
+  #
+  # Setting this to true means:
+  #
+  #   1) redis.conf has a password specified, e.g.
+  #
+  #         masterauth supersecretpassword123
+  #
+  #   2) The slaves are required to provide a password
+  #      when connecting to the master, e.g. in redis.conf:
+  #
+  #         requirepass supersecretpassword123
+  #
+  config.redis_password_required = true
+  config.redis_password = "test123"
 
   # The test environment is used exclusively to run your application's
   # test suite. You never need to work with it otherwise. Remember that
