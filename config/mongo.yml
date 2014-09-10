@@ -16,3 +16,10 @@ development:
    dbname: developmentdb
    migrations_collection: migrations
    profiles_collection: profiles
+
+production:
+   dbhost: localhost
+   dbport: 27017
+   dbname: developmentdb
+   migrations_collection: migrations
+   profiles_collection: profiles
