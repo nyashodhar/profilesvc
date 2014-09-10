@@ -1,4 +1,19 @@
 Rails.application.routes.draw do
+
+  # ProfilesController:
+  #===============================
+  get 'profile', to: 'profiles#get_profile', as: 'get_profile'
+  post 'profile', to: 'profiles#create_or_update', as: 'create_profile'
+  put 'profile', to: 'profiles#create_or_update', as: 'update_profile'
+
+  # DeploymentsController:
+  #===============================
+  get "/", to: "deployments#status", as: 'status'
+
+  # ApplicationController:
+  #===============================
+  match "*path", to: "application#not_found", via: :all
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
