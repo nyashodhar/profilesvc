@@ -11,7 +11,8 @@ class RedisCachedMongoDataObject
   #
 
   def initialize(arguments = {}, validate_fields=true)
-    build_field_hash_from_args(arguments, validate_fields)
+    @field_hash = ActiveSupport::OrderedHash.new()
+    merge_args_into_field_hash(arguments, validate_fields)
   end
 
   def serialize
@@ -52,7 +53,7 @@ class RedisCachedMongoDataObject
   end
 
   def set_fields(arguments)
-    build_field_hash_from_args(arguments, true)
+    merge_args_into_field_hash(arguments, true)
   end
 
   #
@@ -110,7 +111,7 @@ class RedisCachedMongoDataObject
 
   private
 
-  def build_field_hash_from_args(arguments, validate_fields)
+  def merge_args_into_field_hash(arguments, validate_fields)
 
     my_ordered_fields = get_ordered_fields
 
@@ -165,10 +166,9 @@ class RedisCachedMongoDataObject
     #
     # Keep the args in our hash.
     # Note that there could be validation errors.
-    # The store operation will not be allowed on this object if there are validation errors
+    # The store() operation will not be allowed on this object if there are validation errors
     #
 
-    @field_hash = Hash.new
     arguments.keys.each { |arg_key|
       @field_hash[arg_key] = arguments[arg_key]
     }

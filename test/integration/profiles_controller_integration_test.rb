@@ -11,11 +11,12 @@ class ProfilesControllerIntegrationTest < ActionDispatch::IntegrationTest
     check_api_is_protected("GET", "profile", nil, profile_lookup_headers)
   end
 
-  test "GET Profile - Verify fields" do
+  test "GET Profile - Verify profile can be looked up after fields set individually" do
 
     auth_mock_normal
 
-    update_or_post_profile("POST", {:first_name => "Hank", :last_name => "Sank"})
+    update_or_post_profile("POST", {:first_name => "Hank"})
+    update_or_post_profile("POST", {:last_name => "Sank"})
 
     profile_lookup_headers = create_get_headers_with_auth_token('GOOD')
 
