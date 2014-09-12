@@ -26,7 +26,7 @@ module MongoLoader
       exit
     end
 
-    unless mongo_info['profiles_collection']
+    unless mongo_info['migrations_collection']
       STDOUT.write "=> ERROR in Mongo initializer: migrations_collection not specified for env #{the_environment} in #{config_file}\n"
       exit
     end

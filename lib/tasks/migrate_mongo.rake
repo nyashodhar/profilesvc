@@ -26,13 +26,13 @@ namespace :db do
     the_environment = initialize_mongo(args)
     migration_level = args[:migration_level]
 
-    if(migration_level.blank? || (!is_number?(migration_level) && !migration_level.downcase.eql?("latest")))
-      STDOUT.write "Invalid value #{migration_level} for migration level, value must a number or the string \"latest\"\n"
+    if(migration_level.blank? || (!is_number?(migration_level) && !migration_level.upcase.eql?("LATEST")))
+      STDOUT.write "Invalid value #{migration_level} for migration level, value must a number or the string \"LATEST\"\n"
       exit
     end
 
     STDOUT.write "=> Running mongodb migration for environment #{the_environment}\n"
-    STDOUT.write "=> Migration level: #{migration_level}\n"
+    STDOUT.write "=> Migration level: #{migration_level.upcase}\n"
 
     migrations_path = "#{Rails.root}/db/mongo_migration"
     version_to_object = get_migrations(migrations_path, migration_level)
@@ -69,7 +69,7 @@ namespace :db do
 
       version = version.to_i
 
-      if(migration_level.downcase.eql?("latest"))
+      if(migration_level.upcase.eql?("LATEST"))
         target_level = version + 1
       else
         target_level = migration_level.to_i
