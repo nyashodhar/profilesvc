@@ -7,19 +7,27 @@ require "#{Rails.root}/lib/tasks/util/mongo_task_initializer"
 
 include MongoTaskInitializer
 
+############################################################
 #
 # USAGE:
-#   rake db:migrate_mongo[development,201409032100]
 #
-
+#   To migrate to a specific version:
+#
+#       rake db:migrate_mongo[development,201409032100]
+#
+#   To apply all updates available:
+#
+#       rake db:migrate_mongo[development,LATEST]
+#
+############################################################
 namespace :db do
   task :migrate_mongo, [:stage, :migration_level] do |t, args|
 
     the_environment = initialize_mongo(args)
     migration_level = args[:migration_level]
 
-    unless migration_level
-      STDOUT.write "ERROR: Must provide a migration level\n"
+    if(migration_level.blank? || (!is_number?(migration_level) && !migration_level.downcase.eql?("latest")))
+      STDOUT.write "Invalid value #{migration_level} for migration level, value must a number or the string \"latest\"\n"
       exit
     end
 
@@ -60,15 +68,28 @@ namespace :db do
       require(File.expand_path(file))
 
       version = version.to_i
-      migration_level = migration_level.to_i
 
-      object = name.constantize.new(version, migration_level)
+      if(migration_level.downcase.eql?("latest"))
+        target_level = version + 1
+      else
+        target_level = migration_level.to_i
+      end
+
+      object = name.constantize.new(version, target_level)
 
       version_to_object[version] = object
     end
 
     version_to_object = Hash[version_to_object.sort]
     return version_to_object
+  end
+
+  def is_number?(arg)
+    begin
+      !!Integer(arg)
+    rescue ArgumentError, TypeError
+      false
+    end
   end
 
 end
