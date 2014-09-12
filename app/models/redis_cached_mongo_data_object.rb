@@ -12,6 +12,7 @@ class RedisCachedMongoDataObject
 
   def initialize(arguments = {}, validate_fields=true)
     @field_hash = ActiveSupport::OrderedHash.new()
+    @validation_errors = Hash.new
     merge_args_into_field_hash(arguments, validate_fields)
   end
 
@@ -44,12 +45,13 @@ class RedisCachedMongoDataObject
     return @validation_errors.clone
   end
 
-  def set_field(field, value)
+  def set_field(field_name, field_value)
     my_ordered_fields = get_ordered_fields
-    if(my_ordered_fields[field].blank?)
-      raise("Can't set value for field: #{field} is not a valid field. Valid fields are: #{my_ordered_fields.keys}")
+    valid_field_name = validate_field_name(field_name, my_ordered_fields)
+    if(valid_field_name)
+      validate_field_value(field_name, field_value, my_ordered_fields)
     end
-    @field_hash[field] = value
+    @field_hash[field_name] = field_value
   end
 
   def set_fields(arguments)
@@ -111,18 +113,17 @@ class RedisCachedMongoDataObject
 
   private
 
-  def merge_args_into_field_hash(arguments, validate_fields)
+  def merge_args_into_field_hash(arguments, validate_field_values)
 
     my_ordered_fields = get_ordered_fields
 
-    @validation_errors = Array.new
+    invalid_fields = Hash.new
 
     # Check that all the args given are known fields for this object
-    arguments.keys.each { |arg_key|
-      if(my_ordered_fields[arg_key] == nil)
-        @validation_errors.push(I18n.t("data_object_not_valid_field", :field_name => arg_key))
-        #@validation_errors.push("Field #{arg_key} is not a valid field")
-        @@logger.error "Field #{arg_key} is not a valid field. Valid fields are: #{my_ordered_fields.keys}"
+    arguments.keys.each { |field_name|
+      valid_field_name = validate_field_name(field_name, my_ordered_fields)
+      if(!valid_field_name)
+        invalid_fields[field_name] = true
       end
     }
 
@@ -136,29 +137,13 @@ class RedisCachedMongoDataObject
     # created or updated.
     #
 
-    if(validate_fields == true)
+    if(validate_field_values == true)
       # Do validation of the values of each field
       my_ordered_fields.keys.each { |field_name|
-
-        arg = arguments[field_name]
-
-        is_required = my_ordered_fields[field_name][:required]
-        if(is_required && arg == nil)
-          @validation_errors.push(I18n.t("data_object_field_is_required", :field_name => field_name))
-          @@logger.error "Field #{field_name} is required and was not specified in the args #{arguments}"
-        end
-
-        if(arg != nil)
-          expected_type = my_ordered_fields[field_name][:type]
-          if(!expected_type.blank? && arg.class != expected_type)
-            @validation_errors.push(I18n.t("data_object_field_has_invalid_type", :field_name => field_name))
-            @@logger.error "Field #{field_name} is of type #{arg.class} but type #{expected_type} is expected"
-          end
-          max_length = my_ordered_fields[field_name][:max_length]
-          if(!max_length.blank? && arg.to_s.length > max_length)
-            @validation_errors.push(I18n.t("data_object_field_has_invalid_length", :field_name => field_name))
-            @@logger.error "Field #{field_name} has length #{arg.to_s.length} but max length allowed is #{max_length}"
-          end
+        field_value = arguments[field_name]
+        # Note: If the field is not known to this objectthere is no point in validating the value
+        if(invalid_fields[field_name].blank?)
+          validate_field_value(field_name, field_value, my_ordered_fields)
         end
       }
     end
@@ -173,6 +158,67 @@ class RedisCachedMongoDataObject
       @field_hash[arg_key] = arguments[arg_key]
     }
   end
+
+
+  ##################################################
+  #
+  # If field_name is not a known field for object
+  # an error is added to the validation errors hash
+  #
+  ##################################################
+  def validate_field_name(field_name, my_ordered_fields)
+    if(my_ordered_fields[field_name] == nil)
+      @validation_errors[field_name] = I18n.t("data_object_not_valid_field", :field_name => field_name)
+      @@logger.error "Field #{field_name} is not a valid field. Valid fields are: #{my_ordered_fields.keys}"
+      return false
+    end
+    return true
+  end
+
+  ##################################################
+  #
+  # If the value in field_value is not a valid value
+  # for the field for which it has been provided,
+  # an error is added to the validation errors hash
+  #
+  ##################################################
+  def validate_field_value(field_name, field_value, my_ordered_fields)
+
+    is_valid = true
+
+    is_required = my_ordered_fields[field_name][:required]
+    if(is_required && field_value == nil)
+      @validation_errors[field_name] = I18n.t("data_object_field_is_required", :field_name => field_name)
+      @@logger.error "Field #{field_name} is required"
+      is_valid = false
+    end
+
+    if(field_value != nil)
+      expected_type = my_ordered_fields[field_name][:type]
+      if(!expected_type.blank? && field_value.class != expected_type)
+        @validation_errors[field_name] = I18n.t("data_object_field_has_invalid_type", :field_name => field_name)
+        @@logger.error "Field #{field_name} is of type #{field_value.class} but type #{expected_type} is expected"
+        is_valid = false
+      end
+      max_length = my_ordered_fields[field_name][:max_length]
+      if(!max_length.blank? && field_value.to_s.length > max_length)
+        @validation_errors[field_name] = I18n.t("data_object_field_has_invalid_length", :field_name => field_name)
+        @@logger.error "Field #{field_name} has length #{field_value.to_s.length} but max length allowed is #{max_length}"
+        is_valid = false
+      end
+    end
+
+    if(is_valid && !@validation_errors[field_name].blank?)
+      #
+      # The field value is valid, but a previous set operation on this object
+      # happened to provide an invalid value, we should delete that error now
+      # and assume the field_hash will be updated with the new valid value.
+      #
+      @validation_errors.delete(field_name)
+    end
+
+  end
+
 
   def get_ordered_fields
     return @@ordered_fields

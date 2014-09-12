@@ -122,7 +122,9 @@ class ProfilesControllerIntegrationTest < ActionDispatch::IntegrationTest
     assert_response 422
     the_response = JSON.parse(response.body)
     assert_not_nil(the_response["error"])
-    assert_equal(the_response["error"].first, "Field #{field_name} has invalid length")
+
+    error_hash = the_response["error"]
+    assert_equal(error_hash[field_name.to_s], "Field #{field_name} has invalid length")
   end
 
   def profile_ensure_field_value_must_be_a_string(http_method, field_name)
@@ -142,7 +144,9 @@ class ProfilesControllerIntegrationTest < ActionDispatch::IntegrationTest
     assert_response 422
     the_response = JSON.parse(response.body)
     assert_not_nil(the_response["error"])
-    assert_equal(the_response["error"].first, "Field #{field_name} has invalid type")
+
+    error_hash = the_response["error"]
+    assert_equal(error_hash[field_name.to_s], "Field #{field_name} has invalid type")
   end
 
   def update_or_post_profile(http_method, field_hash)
