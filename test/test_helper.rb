@@ -6,6 +6,7 @@ include WebMock::API
 require 'rest-client'
 
 require 'helpers/auth_service_mock_helper'
+require 'helpers/rest_client_util'
 require 'integration/hybrid_integration_test'
 require 'controllers/application_controller_tests'
 require 'controllers/deployments_controller_tests'

@@ -1,10 +1,7 @@
 ########################################################
 #
-# This module provides functionality to test the auth
-# filtering functionality for a given API call.
-#
-# The testing of the auth filter relies on mocking the
-# the behavior of the auth service.
+# This module provides functionality to define some mocked
+# behavior of the auth API of the downstream auth service
 #
 ########################################################
 module AuthServiceMockHelper
