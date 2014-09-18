@@ -1,8 +1,12 @@
-##
-## PER: Add initializer for mongo
-## Used in both migrate_mongo task and actual app initialization
-##
-
+#############################################################
+#
+# This module is used to initialize the connection to mongo
+# and make it available for use in global variables.
+#
+# This moduled is used in both the mongo migrate_rake tasks
+# and in the initialization of the actual rail app itself.
+#
+#############################################################
 module MongoLoader
 
   def load_mongo(the_environment)
@@ -26,7 +30,7 @@ module MongoLoader
       exit
     end
 
-    unless mongo_info['profiles_collection']
+    unless mongo_info['migrations_collection']
       STDOUT.write "=> ERROR in Mongo initializer: migrations_collection not specified for env #{the_environment} in #{config_file}\n"
       exit
     end
@@ -50,10 +54,11 @@ module MongoLoader
       $migrations_coll = $mongo_db.collection(migrations_collection)
 
       #
-      # This is needed for the drop_mongo rake task.
-      # The drop operation is done by passing the name of the db
-      # to the mongo client. Making this a global var makes it
-      # possible to access the actual dbname later.
+      # The config is needed as a global variable for use by the
+      # drop_mongo rake task. The drop operation is done by passing
+      # the name of the db to the mongo client. Making the config
+      # a global var makes it possible to access the actual dbname
+      # later.
       #
       $mongo_config = mongo_info.clone
       STDOUT.write "=> Mongo initializer: Env: #{the_environment}, connected to #{dbhost}:#{dbport}, db: #{dbname}, profiles_collection: #{profiles_collection}, migrations_collection: #{migrations_collection}\n"

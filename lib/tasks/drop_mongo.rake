@@ -7,6 +7,8 @@ require "#{Rails.root}/lib/tasks/util/mongo_task_initializer"
 include MongoTaskInitializer
 
 #
+# This task drops the entire mongo db of the profile service.
+#
 # USAGE:
 #   rake db:drop_mongo[development]
 #
