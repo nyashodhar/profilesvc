@@ -5,6 +5,7 @@ require 'webmock'
 include WebMock::API
 require 'rest-client'
 
+require 'fixtures/auth/auth_service_credentials_util'
 require 'helpers/auth_service_mock_helper'
 require 'helpers/auth_service_real_helper'
 require 'helpers/rest_client_util'

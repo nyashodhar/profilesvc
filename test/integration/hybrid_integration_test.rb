@@ -5,6 +5,8 @@ include RestClientUtil
 
 class HybridIntegrationTest < ActionDispatch::IntegrationTest
 
+  @@auth_service_credentials = AuthServiceCredentialsUtil.new
+
   setup do
 
     @remote_test = false
@@ -150,9 +152,11 @@ class HybridIntegrationTest < ActionDispatch::IntegrationTest
 
   def get_good_auth_token
     if(!@mock_auth_service)
-      return get_token_from_real_login
+      email = @@auth_service_credentials.get_username('1')
+      password = @@auth_service_credentials.get_password('1')
+      return get_token_from_real_login(email, password)
     else
-      return "GOOD"
+     return "GOOD"
     end
   end
 

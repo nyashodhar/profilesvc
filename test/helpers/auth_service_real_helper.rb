@@ -5,14 +5,7 @@ module AuthServiceRealHelper
   # Obtain auth token from real auth service
   #
   ######################################################
-  def get_token_from_real_login
-
-    #
-    # TODO: This should not be hardcoded here...
-    #
-
-    email = "herrstrudel@gmail.com"
-    password = "Test1234"
+  def get_token_from_real_login(email, password)
 
     auth_svc_base_url = Rails.application.config.authsvc_base_url
     auth_url = "#{auth_svc_base_url}/user/auth"
@@ -21,7 +14,7 @@ module AuthServiceRealHelper
     login_user_hash = {:email => email, :password => password}
     login_body = {:user => login_user_hash}
 
-    #STDOUT.write "get_token_from_login(): Doing GET #{auth_url} (headers = #{auth_request_headers}) - body #{login_body}\n"
+    #STDOUT.write "get_token_from_real_login(): Doing GET #{auth_url} (headers = #{auth_request_headers}) - body #{login_body}\n"
 
     begin
 
@@ -32,18 +25,18 @@ module AuthServiceRealHelper
         raise "get_token_from_login(): Auth service login gave success response but no token was found in the response. CODE: #{auth_service_response.code}, RESPONSE: #{auth_service_response} (auth_url = #{auth_url}, auth_request_headers = #{auth_request_headers}, login_body = #{login_body})"
       end
 
-      #STDOUT.write "get_token_from_login(): Auth service login successful. CODE: #{auth_service_response.code}, USERID: #{auth_service_response_hash['id']}\n"
+      #STDOUT.write "get_token_from_real_login(): Auth service login successful. CODE: #{auth_service_response.code}, USERID: #{auth_service_response_hash['id']}\n"
       return auth_service_response_hash['authentication_token']
 
     rescue => e
 
       if(defined? e.response)
         if(e.response.code == 401)
-          raise "get_token_from_login(): Not authorized. CODE: #{e.response.code}, RESPONSE: #{e.response}"
+          raise "get_token_from_real_login(): Not authorized. CODE: #{e.response.code}, RESPONSE: #{e.response}"
         end
-        raise "get_token_from_login(): Unexpected auth service response. CODE: #{e.response.code}, RESPONSE: #{e.response} (auth_url = #{auth_url}, auth_request_headers = #{auth_request_headers})"
+        raise "get_token_from_real_login(): Unexpected auth service response. CODE: #{e.response.code}, RESPONSE: #{e.response} (auth_url = #{auth_url}, auth_request_headers = #{auth_request_headers})"
       else
-        raise "get_token_from_login(): Unexpected error! auth_url = #{auth_url}, auth_request_headers = #{auth_request_headers}, error = #{e}"
+        raise "get_token_from_real_login(): Unexpected error! auth_url = #{auth_url}, auth_request_headers = #{auth_request_headers}, error = #{e}"
       end
     end
   end
