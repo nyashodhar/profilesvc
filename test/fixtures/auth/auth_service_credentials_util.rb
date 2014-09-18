@@ -27,6 +27,8 @@ class AuthServiceCredentialsUtil
     credentials_for_env.keys.each { |userindex|
       @my_credentials[userindex.to_s] = credentials_for_env[userindex]
     }
+
+    STDOUT.write "=> AuthServiceCredentialsUtil: Auth credentials loaded from #{config_file}\n"
   end
 
   def get_password(user_index)

@@ -5,9 +5,8 @@ module AuthServiceRealHelper
   # Obtain auth token from real auth service
   #
   ######################################################
-  def get_token_from_real_login(email, password)
+  def get_token_from_real_login(email, password, auth_svc_base_url)
 
-    auth_svc_base_url = Rails.application.config.authsvc_base_url
     auth_url = "#{auth_svc_base_url}/user/auth"
     auth_request_headers = {'Content-Type' => 'application/json', 'Accept' => 'application/json'}
 
@@ -22,7 +21,7 @@ module AuthServiceRealHelper
       auth_service_response_hash = JSON.parse(auth_service_response)
 
       if(auth_service_response_hash['authentication_token'].blank?)
-        raise "get_token_from_login(): Auth service login gave success response but no token was found in the response. CODE: #{auth_service_response.code}, RESPONSE: #{auth_service_response} (auth_url = #{auth_url}, auth_request_headers = #{auth_request_headers}, login_body = #{login_body})"
+        raise "get_token_from_real_login(): Auth service login gave success response but no token was found in the response. CODE: #{auth_service_response.code}, RESPONSE: #{auth_service_response} (auth_url = #{auth_url}, auth_request_headers = #{auth_request_headers}, login_body = #{login_body})"
       end
 
       #STDOUT.write "get_token_from_real_login(): Auth service login successful. CODE: #{auth_service_response.code}, USERID: #{auth_service_response_hash['id']}\n"

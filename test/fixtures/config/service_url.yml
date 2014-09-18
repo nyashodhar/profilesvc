@@ -1,0 +1,16 @@
+###########################################
+# This file contains some URLs used for
+# RestClient connections in integration tests
+###########################################
+
+test:
+  profile_service_url: http://127.0.0.1:3000
+  auth_service_url: https://authpetpalci.herokuapp.com
+
+development:
+  profile_service_url: http://127.0.0.1:3000
+  auth_service_url: https://authpetpalci.herokuapp.com
+
+production:
+  profile_service_url: http://supercoolservieurl:3000
+  auth_service_url: https://authpetpalci.herokuapp.com

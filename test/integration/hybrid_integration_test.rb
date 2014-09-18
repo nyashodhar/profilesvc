@@ -6,6 +6,7 @@ include RestClientUtil
 class HybridIntegrationTest < ActionDispatch::IntegrationTest
 
   @@auth_service_credentials = AuthServiceCredentialsUtil.new
+  @@remote_service_url = ServiceURLUtil.new
 
   setup do
 
@@ -20,13 +21,7 @@ class HybridIntegrationTest < ActionDispatch::IntegrationTest
       WebMock.allow_net_connect!
     end
 
-    #
-    # TODO: Find better way to obtain URL to service under test
-    #
-    # This is the URL used when running remote integration tests
-    # against a remote system.
-    #
-    @my_svc_url = "http://127.0.0.1:3000"
+    @my_svc_url = @@remote_service_url.get_profile_service_url
   end
 
 
@@ -154,7 +149,8 @@ class HybridIntegrationTest < ActionDispatch::IntegrationTest
     if(!@mock_auth_service)
       email = @@auth_service_credentials.get_username('1')
       password = @@auth_service_credentials.get_password('1')
-      return get_token_from_real_login(email, password)
+      auth_svc_base_url = @@remote_service_url.get_auth_service_url
+      return get_token_from_real_login(email, password, auth_svc_base_url)
     else
      return "GOOD"
     end
