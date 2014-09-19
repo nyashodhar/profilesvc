@@ -6,15 +6,18 @@ include WebMock::API
 require 'rest-client'
 
 require 'fixtures/auth/auth_service_credentials_util'
-require 'fixtures/config/service_url_util'
+require 'fixtures/config/test_settings_util'
 require 'helpers/auth_service_mock_helper'
 require 'helpers/auth_service_real_helper'
-require 'helpers/rest_client_util'
-require 'integration/hybrid_integration_test'
+require 'helpers/base_integration_test'
+require 'integration/local_integration_test'
+require 'remote/remote_integration_test'
+
 require 'controllers/application_controller_tests'
 require 'controllers/deployments_controller_tests'
 require 'controllers/profiles_controller_tests'
 require 'middleware/catch_json_parse_errors_tests'
+
 
 class ActiveSupport::TestCase
 

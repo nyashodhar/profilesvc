@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class DeploymentsControllerLocalIntegrationTest < HybridIntegrationTest
+class DeploymentsControllerLocalIntegrationTest < LocalIntegrationTest
 
   include DeploymentsControllerTests
 

@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ApplicationControllerLocalIntegrationTest < HybridIntegrationTest
+class ApplicationControllerLocalIntegrationTest < LocalIntegrationTest
 
   include ApplicationControllerTests
 
