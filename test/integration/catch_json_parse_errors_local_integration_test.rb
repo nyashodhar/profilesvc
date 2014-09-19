@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class CatchJsonParseErrorsLocalIntegrationTest < HybridIntegrationTest
+class CatchJsonParseErrorsLocalIntegrationTest < LocalIntegrationTest
 
   include CatchJsonParseErrorsTests
 

@@ -6,11 +6,14 @@
 test:
   profile_service_url: http://127.0.0.1:3000
   auth_service_url: https://authpetpalci.herokuapp.com
+  mock_auth_svc_in_tests: true
 
 development:
   profile_service_url: http://127.0.0.1:3000
   auth_service_url: https://authpetpalci.herokuapp.com
+  mock_auth_svc_in_tests: = false
 
 production:
   profile_service_url: http://supercoolservieurl:3000
   auth_service_url: https://authpetpalci.herokuapp.com
+  mock_auth_svc_in_tests: = false

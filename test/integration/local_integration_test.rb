@@ -1,29 +1,18 @@
 
 include AuthServiceMockHelper
 include AuthServiceRealHelper
-include RestClientUtil
 
-class HybridIntegrationTest < ActionDispatch::IntegrationTest
-
-  @@auth_service_credentials = AuthServiceCredentialsUtil.new
-  @@remote_service_url = ServiceURLUtil.new
+class LocalIntegrationTest < BaseIntegrationTest
 
   setup do
-
-    @remote_test = false
-
-    if(Rails.application.config.mock_auth_svc_in_tests)
-      @mock_auth_service = true
+    @mock_auth_service = @@remote_service_url.get_mock_auth_svc_in_tests
+    if(@mock_auth_service)
       WebMock.disable_net_connect!
       auth_mock_normal
     else
-      @mock_auth_service = false
       WebMock.allow_net_connect!
     end
-
-    @my_svc_url = @@remote_service_url.get_profile_service_url
   end
-
 
   ##########################################################
   #
@@ -37,8 +26,6 @@ class HybridIntegrationTest < ActionDispatch::IntegrationTest
     validate_http_method(http_method)
 
     my_headers = create_headers_with_auth_token(http_method, api_uri)
-
-    #my_headers = request_headers.clone
 
     if(@mock_auth_service)
       auth_mock_normal
@@ -86,124 +73,54 @@ class HybridIntegrationTest < ActionDispatch::IntegrationTest
     STDOUT.write "Good news: The API \'#{http_method} #{api_uri}\' passed auth tests.\n"
   end
 
-
-  def exercise_api(http_method, api_uri, request_body, my_headers)
-
-    if(http_method.eql?("POST"))
-      return do_post_with_headers(api_uri, request_body, my_headers)
-    end
-
-    if(http_method.eql?("PUT"))
-      return do_put_with_headers(api_uri, request_body, my_headers)
-    end
-
-    if(http_method.eql?("GET"))
-      return do_get_with_headers(api_uri, my_headers)
-    end
-  end
-
   def create_headers(http_method)
-    if(@remote_test)
-      return create_headers_remote
-    else
-      return create_headers_local(http_method)
+    if(http_method.eql?("POST") || http_method.eql?("PUT"))
+      return { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
+    end
+    if(http_method.eql?("GET"))
+      return {'Content-Type' => 'application/json', 'Accept' => 'application/json' }
     end
   end
 
   def create_headers_with_auth_token(http_method, auth_token)
-    if(@remote_test)
-      return create_headers_with_auth_token_remote(auth_token)
-    else
-      return create_headers_with_auth_token_local(http_method, auth_token)
+    if(http_method.eql?("POST") || http_method.eql?("PUT"))
+      return { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json', 'X-User-Token' => auth_token }
+    end
+
+    if(http_method.eql?("GET"))
+      return {'Content-Type' => 'application/json', 'Accept' => 'application/json', 'X-User-Token' => auth_token }
     end
   end
 
   def do_get_with_headers(api_uri, my_headers)
-    if(@remote_test)
-      return do_get_with_headers_remote(api_uri, my_headers)
-    else
-      get api_uri, nil, my_headers
-      return response
-    end
+    get api_uri, nil, my_headers
+    return response
   end
 
   def do_post_with_headers(api_uri, my_body, my_headers)
-    if(@remote_test)
-      return do_post_with_headers_remote(api_uri, my_body, my_headers)
-    else
-      post api_uri, my_body, my_headers
-      return response
-    end
+    post api_uri, my_body, my_headers
+    return response
   end
 
   def do_put_with_headers(api_uri, my_body, my_headers)
-    if(@remote_test)
-      return do_put_with_headers_remote(api_uri, my_body, my_headers)
-    else
-      put api_uri, my_body, my_headers
-      return response
-    end
+    put api_uri, my_body, my_headers
+    return response
   end
 
   def get_good_auth_token
     if(!@mock_auth_service)
-      email = @@auth_service_credentials.get_username('1')
-      password = @@auth_service_credentials.get_password('1')
-      auth_svc_base_url = @@remote_service_url.get_auth_service_url
-      return get_token_from_real_login(email, password, auth_svc_base_url)
+      return get_token_from_real_login(@email, @password, @auth_svc_base_url)
     else
      return "GOOD"
     end
   end
 
   def assert_response_code(response, expected_response_code)
-    if(@remote_test)
-      assert_response_code_remote(response, expected_response_code)
-    else
-      assert_response expected_response_code
-    end
+    assert_response expected_response_code
   end
 
   def get_content_type(response)
-    if(@remote_test)
-      return get_content_type_remote(response)
-    else
-      return response.headers["Content-Type"]
-    end
-  end
-
-  def create_headers_local(http_method)
-
-    if(http_method.eql?("POST") || http_method.eql?("PUT"))
-      return { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json' }
-    end
-
-    if(http_method.eql?("GET"))
-      return {'Content-Type' => 'application/json', 'Accept' => 'application/json' }
-    end
-  end
-
-  def create_headers_with_auth_token_local(http_method, auth_token)
-
-      if(http_method.eql?("POST") || http_method.eql?("PUT"))
-        return { 'CONTENT_TYPE' => 'application/json', 'ACCEPT' => 'application/json', 'X-User-Token' => auth_token }
-      end
-
-      if(http_method.eql?("GET"))
-        return {'Content-Type' => 'application/json', 'Accept' => 'application/json', 'X-User-Token' => auth_token }
-      end
-  end
-
-
-
-  def validate_http_method(http_method)
-    if(http_method.blank?)
-      raise 'Parameter http_method not specified'
-    end
-
-    if(!(http_method.eql?('GET') || http_method.eql?('POST') || http_method.eql?('PUT')))
-      raise 'Invalid value #{http_method} for http_method.'
-    end
+    return response.headers["Content-Type"]
   end
 
   #########################################
@@ -223,6 +140,8 @@ class HybridIntegrationTest < ActionDispatch::IntegrationTest
     validate_auth_token(auth_token)
     return {'Content-Type' => 'application/json', 'Accept' => 'application/json', 'X-User-Token' => auth_token}
   end
+
+  private
 
   def validate_auth_token(auth_token)
     if(auth_token.blank?)

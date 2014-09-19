@@ -2,8 +2,6 @@ module ProfilesControllerTests
 
   def check_profile_can_looked_up_after_fields_set_individually
 
-    #auth_mock_normal
-
     update_or_post_profile("POST", {:first_name => "Hank"})
     update_or_post_profile("POST", {:last_name => "Sank"})
 
@@ -23,8 +21,6 @@ module ProfilesControllerTests
 
 
   def profile_ensure_field_max_length_is_enforced(http_method, field_name, max_length)
-
-    #auth_mock_normal
 
     field_value = create_str_with_len(max_length+1)
     profile_update_body = { field_name => field_value}.to_json
@@ -49,8 +45,6 @@ module ProfilesControllerTests
 
   def profile_ensure_field_value_must_be_a_string(http_method, field_name)
 
-    #auth_mock_normal
-
     field_value = 7
     profile_update_body = { field_name => field_value}.to_json
     good_auth_token = get_good_auth_token
@@ -73,8 +67,6 @@ module ProfilesControllerTests
 
   def update_or_post_profile(http_method, field_hash)
 
-    #auth_mock_normal
-
     profile_update_body = field_hash.to_json
     good_auth_token = get_good_auth_token
 
@@ -91,10 +83,10 @@ module ProfilesControllerTests
 
     the_response = JSON.parse(response.body)
 
-    field_hash.keys do |field_name|
+    field_hash.keys.each do |field_name|
       assert_not_nil(the_response[field_name.to_s])
       expected_value = field_hash[field_name]
-      assert(the_response[field_name.to_s].eql?(field_value))
+      assert(the_response[field_name.to_s].eql?(expected_value))
     end
 
   end

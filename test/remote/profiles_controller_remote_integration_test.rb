@@ -1,12 +1,8 @@
-class ProfilesControllerRemoteIntegrationTest < HybridIntegrationTest
+require 'test_helper'
+
+class ProfilesControllerRemoteIntegrationTest < RemoteIntegrationTest
 
   include ProfilesControllerTests
-
-  setup do
-    WebMock.allow_net_connect!
-    @remote_test = true
-    @mock_auth_service = false
-  end
 
   #
   # GET /profile
@@ -15,7 +11,6 @@ class ProfilesControllerRemoteIntegrationTest < HybridIntegrationTest
   test "GET Profile - API is protected by auth filter" do
     check_api_is_protected("GET", "profile", nil)
   end
-
 
   test "GET Profile - Verify profile can be looked up after fields set individually" do
     check_profile_can_looked_up_after_fields_set_individually
@@ -53,7 +48,6 @@ class ProfilesControllerRemoteIntegrationTest < HybridIntegrationTest
   test "POST profile  - Set last name of profile" do
     update_or_post_profile("POST", {:last_name => "Von Pal"})
   end
-
 
   #
   # PUT /profile

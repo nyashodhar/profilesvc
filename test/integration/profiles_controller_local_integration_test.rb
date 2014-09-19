@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class ProfilesControllerLocalIntegrationTest < HybridIntegrationTest
+class ProfilesControllerLocalIntegrationTest < LocalIntegrationTest
 
   include ProfilesControllerTests
 

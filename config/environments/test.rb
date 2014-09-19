@@ -2,16 +2,6 @@ Rails.application.configure do
 
   # Settings specified here will take precedence over those in config/application.rb.
 
-  #
-  # Set this to true if integration tests should mock downstream auth service
-  # in the local integration tests.
-  #
-  # Note this setting only has relevance for the local integration tests.
-  # It has no relevance during the execution of remote integration tests that do
-  # requests against a remote service.
-  #
-  config.mock_auth_svc_in_tests = true
-
   # Base URL for downstream auth service
   config.authsvc_base_url = "https://authpetpalci.herokuapp.com"
 
