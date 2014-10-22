@@ -48,3 +48,7 @@ gem 'bson_ext'
 
 # Redis
 gem 'redis'
+
+# ImageUpload
+gem 'carrierwave-aws'
+gem 'mini_magick'

@@ -1,5 +1,7 @@
 class ProfilesController < AuthenticatedController
 
+  require 'rubygems'
+  require 'mini_magick'
   ####################################################
   # Look up the profile for the authenticated user
   #
@@ -63,6 +65,16 @@ class ProfilesController < AuthenticatedController
     profile_to_update.store
 
     render :status => 201, :json => profile_to_update.serialize
+  end
+
+  def image_upload
+    uploader = ImageUploader.new
+    logger.info(params[:action].to_s)
+    file_path = params[:file]
+    File.open(file_path) do |file|
+      something = uploader.store!(file)
+    end
+    uploader.retrieve_from_store!(self.file_name)
   end
 
   private

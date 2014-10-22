@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   get 'profile', to: 'profiles#get_profile', as: 'get_profile'
   post 'profile', to: 'profiles#create_or_update', as: 'create_profile'
   put 'profile', to: 'profiles#create_or_update', as: 'update_profile'
+  post 'profile/image', to: 'profiles#image_upload', as: 'image_upload'
 
   # DeploymentsController:
   #===============================
