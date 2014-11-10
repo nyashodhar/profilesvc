@@ -154,7 +154,7 @@ defaults:
   # This warning is here to help new customers that accidentally have no adapter.
   # You may safely set this to true if you aren't using a common database.
   #
-  #ignore_database_adapter_warning: false
+  ignore_database_adapter_warning: true
 
   # You can add custom keys that will be available in your deploy hooks.
   # Custom keys will be available using config.key or config[:key]
