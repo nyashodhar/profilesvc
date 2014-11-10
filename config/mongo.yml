@@ -18,8 +18,8 @@ development:
    profiles_collection: profiles
 
 production:
-   dbhost: localhost
+   dbhost: ip-172-31-5-119.ec2.internal
    dbport: 27017
-   dbname: developmentdb
+   dbname: productiondb
    migrations_collection: migrations
    profiles_collection: profiles

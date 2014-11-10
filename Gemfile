@@ -42,6 +42,10 @@ gem 'spring',        group: :development
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
+#For EY Deployment
+#EngineYard Specific
+gem 'ey_config'
+
 # Mongo db
 gem 'mongo'
 gem 'bson_ext'
