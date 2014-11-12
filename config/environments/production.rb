@@ -22,7 +22,7 @@ Rails.application.configure do
   #
   #         requirepass supersecretpassword123
   #
-  config.redis_password_required = true
+  config.redis_password_required = false
   config.redis_password = "test123"
 
   # Code is not reloaded between requests.
