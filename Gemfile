@@ -42,9 +42,15 @@ gem 'spring',        group: :development
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
+
+# Mongoid
+gem "mongoid", "~> 4.0.0"
+
 # Mongo db
 gem 'mongo'
-gem 'bson_ext'
+# FIXME - DME: Figure out how to resolve this dependency. Where is it used?
+# According to http://mongoid.org/en/mongoid/v3/upgrading.html , it is not needed anymore
+# gem 'bson_ext'
 
 # Redis
 gem 'redis'

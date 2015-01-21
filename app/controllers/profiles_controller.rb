@@ -14,12 +14,12 @@ class ProfilesController < AuthenticatedController
   # curl -v -X GET http://127.0.0.1:3000/profile -H "Accept: application/json" -H "Content-Type: application/json" -H "X-User-Token: kxDZQAp7_Bpink7L3ynE"
   ####################################################
   def get_profile
-    profile = Profile.find_by_id(@authenticated_user_id)
+    profile = Profile.where(:id => @authenticated_user_id).first
     if(profile.blank?)
       logger.info "Could not find profile for user #{@authenticated_user_id}"
       render :status => 404, :json => I18n.t("404response_resource_not_found")
     else
-      render :status => 200, :json => profile.serialize()
+      render :status => 200, :json => profile.to_json
     end
   end
 
@@ -43,32 +43,30 @@ class ProfilesController < AuthenticatedController
   # curl -v -X POST http://127.0.0.1:3000/profile -H "Accept: application/json" -H "Content-Type: application/json" -H "X-User-Token: a6XK1qPfwyNd_HqjsgSS" -d '{"first_name":"Frank", "last_name":"Prank"}'
   ####################################################
   def create_or_update
-
     object_update_args = prepare_profile_update_args
 
-    profile_to_update = Profile.find_by_id(@authenticated_user_id, false)
-    if(profile_to_update.blank?)
+    profile_to_update = Profile.where(:id => @authenticated_user_id).first
+
+    is_saved = if profile_to_update
+      profile_to_update.update_attributes(object_update_args)
+    else
       # We'll be creating a new one..
       profile_to_update = Profile.new(object_update_args)
-    else
-      profile_to_update.set_fields(object_update_args)
+      profile_to_update.save
     end
 
-    if(profile_to_update.has_validation_errors)
+    unless is_saved
       # Note: The validation errors from the data object are already localized
-      render :status => 422, :json => { :error => profile_to_update.get_validation_errors }
+      render :status => 422, :json => { :error => profile_to_update.errors }
       return
     end
 
-    profile_to_update.store
-
-    render :status => 201, :json => profile_to_update.serialize
+    render :status => 201, :json => profile_to_update.to_json
   end
 
   private
 
   def prepare_profile_update_args
-
     profile_request_args = request.params[:profile]
 
     object_update_args = Hash.new
