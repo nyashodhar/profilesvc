@@ -14,7 +14,7 @@ class ProfilesController < AuthenticatedController
   # curl -v -X GET http://127.0.0.1:3000/profile -H "Accept: application/json" -H "Content-Type: application/json" -H "X-User-Token: kxDZQAp7_Bpink7L3ynE"
   ####################################################
   def get_profile
-    profile = Profile.where(:id => @authenticated_user_id).first
+    profile = Profile.where(:user_id => @authenticated_user_id).first
     if(profile.blank?)
       logger.info "Could not find profile for user #{@authenticated_user_id}"
       render :status => 404, :json => I18n.t("404response_resource_not_found")
@@ -45,7 +45,7 @@ class ProfilesController < AuthenticatedController
   def create_or_update
     object_update_args = prepare_profile_update_args
 
-    profile_to_update = Profile.where(:id => @authenticated_user_id).first
+    profile_to_update = Profile.where(:user_id => @authenticated_user_id).first
 
     is_saved = if profile_to_update
       profile_to_update.update_attributes(object_update_args)
@@ -70,7 +70,7 @@ class ProfilesController < AuthenticatedController
     profile_request_args = request.params[:profile]
 
     object_update_args = Hash.new
-    object_update_args[:id] = @authenticated_user_id
+    object_update_args[:user_id] = @authenticated_user_id
 
     if(!profile_request_args[:first_name].blank?)
       object_update_args[:first_name] = profile_request_args[:first_name]
