@@ -28,7 +28,8 @@ en:
   #
   # Data object validation errors
   #
-  data_object_not_valid_field: "Field %{field_name} is not a valid field"
-  data_object_field_is_required: "Field %{field_name} is required"
-  data_object_field_has_invalid_type: "Field %{field_name} has invalid type"
-  data_object_field_has_invalid_length: "Field %{field_name} has invalid length"
+
+  # Mongoid
+  input_is_too_long: "Input is too long"
+  input_is_too_short: "Input is too short"
+  field_is_required: "Field is required"

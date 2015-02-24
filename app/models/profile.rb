@@ -1,21 +1,30 @@
-class Profile < RedisCachedMongoDataObject
+class Profile
+  include Mongoid::Document
 
-  @@profile_ordered_fields = @@ordered_fields.clone
-  @@profile_ordered_fields[:first_name] = {:required => false, :max_length => 256, :type => String}
-  @@profile_ordered_fields[:last_name] = {:required => false, :max_length => 256, :type => String}
+  field :user_id, type: String
+  validates_presence_of :user_id, message: I18n.t("field_is_required")
 
-  private
+  field :first_name, type: String
+  validates_presence_of :first_name, message: I18n.t("field_is_required")
+  validates :first_name, length: {
+      minimum: 1, too_short: I18n.t("input_is_too_short"),
+      maximum: 256, too_long: I18n.t("input_is_too_long")
+  }
 
-  def self.static_get_mongo_collection
-    return $profiles_coll
-  end
+  field :last_name, type: String
+  validates_presence_of :last_name, message: I18n.t("field_is_required")
+  validates :last_name, length: {
+      minimum: 1, too_short: I18n.t("input_is_too_short"),
+      maximum: 256, too_long: I18n.t("input_is_too_long")
+  }
 
-  def get_mongo_collection
-    return $profiles_coll
-  end
 
-  def get_ordered_fields
-    @@profile_ordered_fields
-  end
+  #
+  # INDEXES
+  #
+  # Note on sparse indexes in mongo:
+  #   http://stackoverflow.com/questions/8608567/sparse-indexes-and-null-values-in-mongo
+  #
+  index({ user_id: 1 }, { unique: true, background: true, sparse: false })
+
 end
-

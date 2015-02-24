@@ -1,3 +1,6 @@
+require 'fixtures/auth/auth_service_credentials_util'
+require 'fixtures/config/test_settings_util'
+
 class BaseIntegrationTest < ActionDispatch::IntegrationTest
 
   @@auth_service_credentials = AuthServiceCredentialsUtil.new
